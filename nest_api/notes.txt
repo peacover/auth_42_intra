@@ -1,0 +1,16 @@
+nest new nest_api
+nest g module user
+nest g service user
+nest g service prisma --no-spec
+
+docker system prune -a
+docker images -a
+docker volume ls
+docker image prune
+
+npm install prisma --save-dev
+npm install --save @prisma/client
+npx prisma init
+npx prisma migrate dev // generating sql tables
+npx prisma generate // create typescript types for ur prisma schema so we use it in our code
+npx prisma studio
