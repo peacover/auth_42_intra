@@ -613,7 +613,7 @@
               619.04
             ],
             "rotation": 0,
-            "text": "id\nid_user1\nid_user2\nmode(1,2,3)\nscore_user1\nscore_user2\ntime\nstatus(playing,finished)",
+            "text": "id\nid_user1\nid_user2\nmode(1,2,3)\nscore_user1\nscore_user2\ntime\nstatus(playing,finished,\npaused)",
             "style": {
               "color": "black",
               "size": "small",
