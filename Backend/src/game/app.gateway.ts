@@ -427,30 +427,35 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (this.queues[i].state === "play")
         j++;
     }
-    //console.log("ANA RANI HNA WECH A 3CHIIIREEEEEEEEEEEEE "+j);
+    //console.log("ANA RANI HNA WECH A 3CHIIIREEEEEEEEEEEEE "+j); 
     socket.emit('gameCount', j);
+    //console.log("This is my socket 2: "+socket.id);
   }
 
   @SubscribeMessage('spectJoin')  
   spectJoin(socket: Socket,payload: any): void
   {
     let j: number=0;
+    let x: number=0;
 
-    console.log("Number of live games now : "+payload.value);
     for(let i = 0; i < this.queues.length; i++)
     {
       if (this.queues[i].state === "play")
       {
         j++;
-        if (j === payload.value)
-        {
-          socket.join(this.queues[i].room);
-          console.log("ANA RANI HNA WECH A 3CHIIIREEEEEEEEEEEEE "+this.queues[i].room);
-        }
-          
+        if (j.toString() === payload.value)
+          x = i;
+        // else
+        // {
+        //   socket.leave(this.queues[i].room);
+        // }          
       }
-
     }
+    // 
+    // console.log("Number of live games now : "+this.queues[x].room);
+    //console.log("This is my socket : "+payload.value);
+    //if (this.queues.length === 1)
+      socket.join(this.queues[x].room);
   }
 
   @SubscribeMessage('GameEnded')
