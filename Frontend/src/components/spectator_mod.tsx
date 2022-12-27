@@ -11,7 +11,8 @@ import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { useSearchParams } from "react-router-dom";
 import { stat } from "fs";
-
+import './../index.css';
+import './../App.css';
 interface live_games {
     count: number;
 }
@@ -57,8 +58,13 @@ const Spectator = () => {
   function buttonPressed(nbr: number) {
     button_cpt = 1;
     //console.log("nbr " + nbr);
-    if (socket.current != null)
-      socket.current.emit("spectJoin", { value: nbr });
+
+    
+    //socket.current?.disconnect();
+    //socket.current?.connect();
+    setCpt(+nbr);
+    // if (socket.current != null)
+    //   socket.current.emit("spectJoin", { value: nbr });
     setState("started watching");
     //hh = c;
     //buttons.splice(0, c);
@@ -68,21 +74,43 @@ const Spectator = () => {
   useEffect(() => {
     socket.current = io("http://localhost:5555").on("connect", () => {
 
+      
       socket.current?.on("gameCount", (data) => {
-
-        my_live_games.current = data;
+        //console.log("dkhelt ta hna " + data);
+        //my_live_games.current = data;
         setLayhfdk(+data);
+        //console.log("Hahwa my cpt " +window.location.pathname.split("/")[2]);
         //console.log("nadi " + layhfdk);
       });
 
+      // if (Cpt === 0)
+      // {
+      //   console.log("wselt a 3chiri");
+      //  socket.current?.emit("spectJoin", { value: window.location.pathname.split("/")[2] });
+      //   setCpt(+1); 
+      // }
+      // console.log("wselt a 3chiri mra tanya "+Cpt);
 
-      socket.current?.on("queue_status", (data: GameState) => {
 
-        if (state == "waiting") {
-
+      const pageName = window.location.pathname.split("/")[1];
+      const room = window.location.pathname.split("/")[2];
+      if (pageName === "watch")
+      {
+        if (room)
+        {
+          socket.current?.emit("spectJoin", { value: room });
         }
-        gameState.current = data;
-      });
+      }
+
+
+        socket.current?.on("queue_status", (data: GameState) => {
+          console.log("dkhlet hna tani "+layhfdk);
+          if (state == "waiting") {
+
+          }
+          gameState.current = data;
+        });        
+
 
       return () => {
         socket.current?.removeAllListeners();
@@ -125,67 +153,11 @@ const Spectator = () => {
             scalingRatio = relativeWidth / absoluteWidth;
            // console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
           }
-      
-          // const [windowSize, setWindowSize] = useState(getWindowSize());
-      
-          // const [sectionWidth, setSectionWidth] = useState(getWindowSize().innerWidth);
-          // const [sectionHeight, setSectionHeight] = useState(getWindowSize().innerHeight);
-          // p5.resizeCanvas(getWindowSize().innerWidth   , get_window_height()  );
-          // p5.background(122);
           p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
           p5.background(122);
-      
-          let awdi = 0;
-          //console.log("Here here" + buttons.length);
-          if (state == "spect") {
-            //console.log("Hana awdtani " + hh);
-            //console.log("wa zabi");
-            if (socket.current != null) {
-              //console.log("wa zabi2");
-              //console.log("Here broski");
-      
-              if (hh != 0) {
-      
-                //console.log("jsp mali dakhl hna : " + layhfdk);
-              }
-      
-      
-            }
-      
-            //console.log("hadi hya ok " + ok);
-            // socket.on('data', (data) => {
-            //   console.log(data);
-            // });
-      
-      
-          }
-          else if (state == "started watching") {
-      
-          }
-      
-          // Clear the canvas
-          let gameCountElement = document.getElementById('gameCount');
-      
-          if (state == "waiting") {
-      
-          }
-          //console.log("Winner is "+ gameState.current?.players.indexOf(gameState.current.winner));
-          let winner_id = gameState.current?.players.indexOf(gameState.current.winner);
-      
+    
           // setState("Play");
           if (gameState.current != null) {
-      
-      
-      
-            // if (relativeHeight > 400) 
-            // {
-            //   absoluteHeight = gameState.current.height;
-            //   relativeHeight = 400;
-            //   absoluteWidth = absoluteHeight * aspectRatio; //
-            //   relativeWidth = relativeHeight * aspectRatio; // if any of these overflowas section dimensions, we scale based on the one that over flows
-            //   scalingRatio = relativeHeight / absoluteHeight;
-            // }
-      
             const drawClickToStartText = (p5: p5Types) => {
               if (gameState.current != null && socket.current != null) {
       
@@ -269,6 +241,7 @@ const Spectator = () => {
             drawClickToStartText(p5);
             drawScore(p5);
             //console.log("Heres my aspect ratio " + aspectRatio);
+            // i want to use href with buttons inside of a loop that will redirect me to a certain page with a certain  index
             //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
             p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
       
@@ -281,8 +254,9 @@ const Spectator = () => {
   //};
   return <div className="canvas-container">
     <div>
+
         {Array.from({ length: layhfdk }, (v, i) => i + 1).map(i => (
-            <button key={i} onClick={() => buttonPressed(i)}>YAWDI HAAAANAAAAA {i}</button>
+            <a href={`/watch/${i}`}><button key={i} onClick={() => buttonPressed(i)} >YAWDI HAAAANAAAAA {i}</button></a>
         ))}
     </div>
     <Sketch setup={setup} draw={draw} />

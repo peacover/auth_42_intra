@@ -8,18 +8,17 @@ import p5 from 'p5';
 import {Paddle, Lobby, MessageInput} from "./components/Lobby"
 import logo from './logo.svg';
 import  SketchPong  from './components/My_sketch';
-import './App.css';
+import  Spectator  from './components/spectator_mod';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
 
 function App() {
-
-
   return (
   <BrowserRouter>
       <Routes>
         <Route path='/game' element={<SketchPong/>} />
+        <Route path='/watch/*' element={<Spectator/>} />
         
       </Routes>
   </BrowserRouter>)
@@ -27,3 +26,4 @@ function App() {
 }
   
  export default App
+

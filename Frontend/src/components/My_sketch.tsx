@@ -102,11 +102,7 @@ const SketchPong = () => {
     });
   }, [state, layhfdk]);
 
-  if (gameState.current != null) {
-  }
 
-  else
-    console.log("wrong");
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
     
@@ -137,65 +133,11 @@ const SketchPong = () => {
       console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
     }
 
-    // const [windowSize, setWindowSize] = useState(getWindowSize());
-
-    // const [sectionWidth, setSectionWidth] = useState(getWindowSize().innerWidth);
-    // const [sectionHeight, setSectionHeight] = useState(getWindowSize().innerHeight);
-    // p5.resizeCanvas(getWindowSize().innerWidth   , get_window_height()  );
-    // p5.background(122);
     p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
     p5.background(122);
 
-    let awdi = 0;
-    console.log("Here here" + buttons.length);
-    if (state == "spect") {
-      console.log("Hana awdtani " + hh);
-      //console.log("wa zabi");
-      if (socket.current != null) {
-        //console.log("wa zabi2");
-        //console.log("Here broski");
-
-        if (hh != 0) {
-
-          console.log("jsp mali dakhl hna : " + layhfdk);
-        }
-
-
-      }
-
-      //console.log("hadi hya ok " + ok);
-      // socket.on('data', (data) => {
-      //   console.log(data);
-      // });
-
-
-    }
-    else if (state == "started watching") {
-
-    }
-
-    // Clear the canvas
-    let gameCountElement = document.getElementById('gameCount');
-
-    if (state == "waiting") {
-
-    }
-    //console.log("Winner is "+ gameState.current?.players.indexOf(gameState.current.winner));
-    let winner_id = gameState.current?.players.indexOf(gameState.current.winner);
-
-    // setState("Play");
-    if (gameState.current != null) {
-
-
-
-      // if (relativeHeight > 400) 
-      // {
-      //   absoluteHeight = gameState.current.height;
-      //   relativeHeight = 400;
-      //   absoluteWidth = absoluteHeight * aspectRatio; //
-      //   relativeWidth = relativeHeight * aspectRatio; // if any of these overflowas section dimensions, we scale based on the one that over flows
-      //   scalingRatio = relativeHeight / absoluteHeight;
-      // }
+    if (gameState.current != null) 
+    {
 
       const drawClickToStartText = (p5: p5Types) => {
         if (gameState.current != null && socket.current != null) {
@@ -344,8 +286,8 @@ const SketchPong = () => {
 
     {
       state === "waiting" ?
-        <div>
-          <button onClick={() => {
+        <div className="container mx-auto bg-gray-200 rounded-xl shadow border p-8 m-10">
+          <button className="p-2 pl-5 pr-5 transition-colors duration-700 transform bg-indigo-500 hover:bg-blue-400 text-gray-100 text-lg rounded-lg focus:border-4 border-indigo-300" onClick={() => {
             //alert()
 
             setState("play");
