@@ -14,6 +14,7 @@ import { useSearchParams } from "react-router-dom";
 import { stat } from "fs";
 import  Spectator  from './spectator_mod';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import BackGround from '../pages/background.jpg'
 
 
   
@@ -38,7 +39,8 @@ const SketchPong = () => {
   const gameState = useRef(null as null | GameState);
   const [state, setState] = useState("waiting");
   const [Cpt, setCpt] = useState(0);
-
+  const [user_one, setUserone] = useState("");
+  const [user_two, setUsertwo] = useState("");
 
   const [my_width, setWidth] = useState(window.innerWidth);
   const [m_height, setHeight] = useState(window.innerHeight);
@@ -184,7 +186,36 @@ const SketchPong = () => {
 
   }
 
+  function User_avatar_one() {
+    if (gameState.current != null)
+      setUserone(gameState.current.players_avatar[0]);
+    
+     //console.log("heres my image"+ user_one);
+    const imageLink = user_one;
+  
+    return (
+      
+        <img className="flex-grow" src={imageLink} alt="description of image" />
+      
+    );
+  }
+
+  function User_avatar_two() {
+    if (gameState.current != null)
+      setUsertwo(gameState.current.players_avatar[1]);
+    
+     //console.log("heres my image"+ user_one);
+    const imageLink = user_two;
+  
+    return (
+      
+        <img className="flex-grow" src={imageLink} alt="description of image" />
+      
+    );
+  }
+
   function draw(p5: p5Types) {
+    
     function getWindowSize() {
       const { innerWidth, innerHeight } = window;
       return { innerWidth, innerHeight };
@@ -194,6 +225,8 @@ const SketchPong = () => {
       return getWindowSize().innerHeight;
     }
     if (gameState.current != null) {
+      setUserone(gameState.current.players_avatar[0]);
+      setUsertwo(gameState.current.players_avatar[1]);
       aspectRatio = gameState.current.aspectRatio;
 
       absoluteWidth = gameState.current.width;
@@ -214,10 +247,11 @@ const SketchPong = () => {
 
     if (gameState.current != null) 
     {
+      setUserone(gameState.current.players_avatar[0]);
 
       const drawClickToStartText = (p5: p5Types) => {
         if (gameState.current != null && socket.current != null) {
-
+            
 
           let width = getWindowSize().innerWidth;
           let height = getWindowSize().innerHeight;
@@ -367,8 +401,8 @@ const SketchPong = () => {
 
     {
       state === "waiting" ?
-        <div className="container mx-auto bg-gray-200 rounded-xl shadow border p-8 m-10">
-          <button className="p-2 pl-5 pr-5 transition-colors duration-700 transform bg-indigo-500 hover:bg-blue-400 text-gray-100 text-lg rounded-lg focus:border-4 border-indigo-300" onClick={() => {
+        <div >
+          <button onClick={() => {
             //alert()
 
             setState("play");
@@ -399,12 +433,26 @@ const SketchPong = () => {
             ))} */}
             <Spectator/>
           </div>
-          : <div className="canvas-container">
-            <div className="component1">
-              <Sketch setup={setup_2} draw={draw_2}  />
+          : <div className="flex flex-col items-center justify-center min-h-full md:shrink-0 w-full h-full absolute" style={{ backgroundImage: `url(${BackGround})` }}>
+          <div className="flex flex-row justify-between bg-transparent w-2/4   md:h-16 lg:h-24 xl:h-32 sm:h-24 ">
+            <div className="flex w-2/12 h-5/6 ">
+              <User_avatar_one />
             </div>
-            <Sketch setup={setup} draw={draw}  />
-            </div>)
+            <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+              Ael-bagh
+            </div>
+            <div className="flex md:w-auto w-2/12 text-base text-white items-center justify-center">
+              2-1
+            </div>
+            <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+              Aainhaja
+            </div>
+            <div className="flex justify-between align-end w-2/12 h-5/6">
+              <User_avatar_two />
+            </div>
+          </div>
+          <Sketch setup={setup} draw={draw} />
+        </div>)        
 
 
 

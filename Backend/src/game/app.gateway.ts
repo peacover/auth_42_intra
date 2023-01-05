@@ -121,7 +121,7 @@ class Game {
     this.aspectRatio = 2 ;
   
     this.ball_radius = 10;
-    this.ball_speed = 2.25;
+    this.ball_speed = 0.25;
 
     this.paddle_width = 10;
     this.paddle_height = 100;
