@@ -11,13 +11,18 @@ const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const app_gateway_1 = require("./app.gateway");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
+const user_service_1 = require("../user/user.service");
+const prisma_module_1 = require("../prisma/prisma.module");
+const user_module_1 = require("../user/user.module");
 let GameModule = class GameModule {
 };
 GameModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [prisma_module_1.PrismaModule, jwt_1.JwtModule, user_module_1.UsersModule],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService, app_gateway_1.AppGateway],
+        providers: [app_service_1.AppService, app_gateway_1.AppGateway, user_service_1.UserService, config_1.ConfigService],
     })
 ], GameModule);
 exports.GameModule = GameModule;

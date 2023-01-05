@@ -1,6 +1,7 @@
 import React from "react";
 import Sketch from "react-p5";
 import p5Types from "p5";
+import axios from 'axios';
 
 import P5Wrapper from 'react-p5';
 import p5 from 'p5';
@@ -13,6 +14,22 @@ import { useSearchParams } from "react-router-dom";
 import { stat } from "fs";
 import  Spectator  from './spectator_mod';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
+
+  
+  // await axios.get( process.env.REACT_APP_BACKEND_URL+ "/chat/myChannels", 
+  // {withCredentials: true} 
+  // ).then((res)=>{
+  //   var myChannels : Array<string> = [];
+  //   for (let index = 0; index < res.data.length; index++) {
+  //     myChannels.push(res.data[index].channelId);
+  //   }
+  //   myChannels.push(userLogin);
+  //   // mychannels.pushback(userlogin)
+  //   socket.emit('joinRoom', myChannels)
+  // }).catch((err)=>{
+  // })
+  //}
 
 
 const SketchPong = () => {
@@ -30,7 +47,6 @@ const SketchPong = () => {
     const { innerWidth, innerHeight } = window;
     return { innerWidth, innerHeight };
   }
-
 
 
 
@@ -53,7 +69,7 @@ const SketchPong = () => {
 
   function buttonPressed(nbr: number) {
     button_cpt = 1;
-    console.log("nbr " + nbr);
+    //console.log("nbr " + nbr);
     if (socket.current != null)
       socket.current.emit("spectJoin", { value: nbr });
     setState("started watching");
@@ -62,15 +78,20 @@ const SketchPong = () => {
     //
   }
 
+
   useEffect(() => {
-    socket.current = io("http://localhost:5555").on("connect", () => {
+
+
+    socket.current = io("http://localhost:4000", {
+      withCredentials: true,
+    }).on("connect", () => {
 
     if (socket.current != null)
     {
         socket.current.on('gameCount', (data) => {
         hh = data;
         setLayhfdk(+ data);
-        console.log("wch a 3chiri " + layhfdk);
+        //console.log("wch a 3chiri " + layhfdk);
       });      
     }
     if (state == "play" && layhfdk === 0)
@@ -83,7 +104,7 @@ const SketchPong = () => {
           socket.current.on('gameCount', (data) => {
             hh = data;
             setLayhfdk(+ data);
-            console.log("wch a 3chiri " + layhfdk);
+            //console.log("wch a 3chiri " + layhfdk);
           });
       }
 
@@ -103,9 +124,62 @@ const SketchPong = () => {
   }, [state, layhfdk]);
 
 
-  const setup = (p5: p5Types, canvasParentRef: Element) => {
+  const setup_2 = (p5: p5Types,canvasParentRef: Element) => {
+    p5.createCanvas(window.innerWidth/4 , (window.innerWidth / 8)).parent(canvasParentRef)
+
+    p5.background(70);
+
+  }
+
+  function draw_2(p5: p5Types)
+  {
+    p5.resizeCanvas(window.innerWidth/2 , (window.innerWidth / 8))
+
+    p5.background(70);
+    function getWindowSize() {
+      const { innerWidth, innerHeight } = window;
+      return { innerWidth, innerHeight };
+    }
+    const player_names = (p5: p5Types) => {
+      // this method will allow us to draw the score line of both players
+      // we start of by filling the whole screen black 
+      // we allign the text in the center and we can rectrieve the score of each players using the gamestate that is constantly
+      //retrieving data from the backend of our code and then we display it
+      // how to create as many buttons as i want based on a number 
+
+      p5.fill(0);
+      p5.textSize((getWindowSize().innerHeight * 20) / getWindowSize().innerHeight);
+      p5.textAlign(p5.CENTER);
+      //p5.resizeCanvas(getWindowSize().innerWidth, getWindowSize().innerHeight);
+      //console.log(relativeHeight);
+      if (gameState.current != null) {
+        p5.text(
+          gameState.current.players_names[0],
+          (getWindowSize().innerWidth / 46) * 7,
+          getWindowSize().innerWidth / 32
+        );
+
+        // p5.loadImage(gameState.current.players_avatar[0]);
+        // p5.loadImage(gameState.current.players_avatar[1]);
+
+        p5.text(
+          gameState.current.players_names[1],
+          (getWindowSize().innerWidth / 24) * 9,
+          getWindowSize().innerWidth / 32
+        );
+
+
+
+      }
+
+    };
+    player_names(p5);
+
+  }
+
+  const setup = (p5: p5Types,canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
-    
+
     p5.background(122);
 
   }
@@ -130,11 +204,13 @@ const SketchPong = () => {
       relativeHeight = (relativeWidth / aspectRatio);
 
       scalingRatio = relativeWidth / absoluteWidth;
-      console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
+      //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
     }
 
     p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
     p5.background(122);
+
+    
 
     if (gameState.current != null) 
     {
@@ -178,6 +254,8 @@ const SketchPong = () => {
 
       };
 
+      
+
       const drawScore = (p5: p5Types) => {
         // this method will allow us to draw the score line of both players
         // we start of by filling the whole screen black 
@@ -219,9 +297,12 @@ const SketchPong = () => {
       //console.log("Asbhan lah " + gameState.current.state);
       // p5.resizeCanvas(getWindowSize().innerWidth   , relativeHeight);
       // p5.background(122);
+      //console.log("Plyaer name is "+gameState.current.players_names[0]);
       drawClickToStartText(p5);
       drawScore(p5);
-      console.log("Heres my aspect ratio " + aspectRatio);
+      
+     //player_names(p5);
+      //console.log("Heres my aspect ratio " + aspectRatio);
       //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
       p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
 
@@ -318,7 +399,12 @@ const SketchPong = () => {
             ))} */}
             <Spectator/>
           </div>
-          : <div className="canvas-container"><Sketch setup={setup} draw={draw}  /></div>)
+          : <div className="canvas-container">
+            <div className="component1">
+              <Sketch setup={setup_2} draw={draw_2}  />
+            </div>
+            <Sketch setup={setup} draw={draw}  />
+            </div>)
 
 
 

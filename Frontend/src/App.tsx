@@ -9,7 +9,10 @@ import {Paddle, Lobby, MessageInput} from "./components/Lobby"
 import logo from './logo.svg';
 import  SketchPong  from './components/My_sketch';
 import  Spectator  from './components/spectator_mod';
+import  Home  from './pages/home';
+import  Login  from './pages/login';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
 
 
 
@@ -19,7 +22,8 @@ function App() {
       <Routes>
         <Route path='/game' element={<SketchPong/>} />
         <Route path='/watch/*' element={<Spectator/>} />
-        
+        <Route path='/login' element={<Login/>} />
+        <Route path='/' element={<Home/>} />
       </Routes>
   </BrowserRouter>)
 

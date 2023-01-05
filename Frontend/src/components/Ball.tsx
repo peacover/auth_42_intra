@@ -24,6 +24,8 @@ interface GameState {
 
     state: string; // "waiting" | "play" | "scored" | "endGame"
     players : Array<string>;
+    players_avatar : Array<string>;
+    players_names : Array<string>;
     spectators: Array<string>;
 
     scores: Array<number>;

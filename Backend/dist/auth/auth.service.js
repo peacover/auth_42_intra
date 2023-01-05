@@ -32,6 +32,11 @@ let AuthService = class AuthService {
             const payload = {
                 id: req.user.id,
             };
+            console.log("zabiiii" + this.prisma.user.count({
+                where: {
+                    id: req.user.id,
+                }
+            }));
             const nb_user = await this.prisma.user.count({
                 where: {
                     id: req.user.id,
@@ -68,11 +73,15 @@ let AuthService = class AuthService {
                     expiresIn: '1d',
                     secret: secret,
                 });
-                res.cookie('access_token', access_token, { httpOnly: true }).status(200);
-                res.json({ message: "success!" });
+                req.res.cookie('access_token', access_token, {
+                    httpOnly: true,
+                    path: '/',
+                });
+                req.res.redirect(`http://localhost:3000/`);
             }
         }
-        catch (_a) {
+        catch (error) {
+            console.log("my error uis " + error);
             throw new common_1.HttpException("Login failed!", 400);
         }
     }

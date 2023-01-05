@@ -16,15 +16,22 @@ export class AuthService {
     
     async login(@Req() req, @Res() res){
         try{
+            
             const payload = {
                 id: req.user.id,
             };
+            console.log("zabiiii" + this.prisma.user.count({
+                where:{
+                    id: req.user.id,
+                }
+            }));
             const nb_user : number = await this.prisma.user.count({
                 where:{
                     id: req.user.id,
                 }
             });
             const zero : number = 0;
+            
             if (nb_user === 0){
                 const user = await this.prisma.user.create({
                     data : {
@@ -55,12 +62,15 @@ export class AuthService {
                       expiresIn : '1d',
                       secret : secret,
                   });
-                res.cookie('access_token', access_token, { httpOnly: true }).status(200);
-                // res.send(access_token);
-                res.json({message :"success!"});
+                req.res.cookie('access_token', access_token, {
+                    httpOnly: true,
+                    path: '/',
+                });
+                req.res.redirect(`http://localhost:3000/`);
             }
         }
-        catch{
+        catch(error){
+            console.log("my error uis "+error);
             throw new HttpException("Login failed!", 400);
         }
     }

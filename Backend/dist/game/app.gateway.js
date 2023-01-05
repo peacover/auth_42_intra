@@ -13,6 +13,10 @@ exports.AppGateway = void 0;
 const common_1 = require("@nestjs/common");
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
+const prisma_service_1 = require("../prisma/prisma.service");
+const user_service_1 = require("../user/user.service");
+const config_1 = require("@nestjs/config");
+const jwt_1 = require("@nestjs/jwt");
 class Game {
     constructor(server) {
         this.server = server;
@@ -20,7 +24,7 @@ class Game {
         this.height = 400;
         this.aspectRatio = 2;
         this.ball_radius = 10;
-        this.ball_speed = 0.25;
+        this.ball_speed = 2.25;
         this.paddle_width = 10;
         this.paddle_height = 100;
         this.paddleSpeed = 10;
@@ -34,12 +38,16 @@ class Game {
         this.sec_paddle_y = 0;
         this.state = "waiting";
         this.players = [];
+        this.players_avatar = [];
+        this.players_names = [];
         this.room = "";
         this.scores = [0, 0];
         this.score_limit = 2;
         this.winner = "";
         this.lastscored = "";
         this.numgames = 0;
+        this.prisma = new prisma_service_1.PrismaService(new config_1.ConfigService);
+        this.user_Service = new user_service_1.UserService(this.prisma, new config_1.ConfigService);
     }
     player_ids() {
         return this.players;
@@ -50,7 +58,6 @@ class Game {
     }
     check_players_are_ready() {
         if (this.players.length === 2) {
-            console.log("players are ready");
             this.server.to(this.room).emit("queue_status", this.queue_status());
             this.starting_queue();
             this.update_status("play");
@@ -62,9 +69,19 @@ class Game {
         else
             this.winner = this.players[0];
     }
-    push_player(player) {
-        if (this.players.length < 2)
-            this.players.push(player);
+    push_player(player, avatar, name) {
+        if (this.players.length < 2) {
+            if (this.players_names[0] !== name) {
+                this.players.push(player);
+                this.players_avatar.push(avatar);
+                this.players_names.push(name);
+            }
+        }
+    }
+    remove_player() {
+        this.players.pop();
+        this.players_avatar.pop();
+        this.players_names.pop();
     }
     addSpec(spec) {
         this.spects.push(spec);
@@ -110,6 +127,7 @@ class Game {
             this.scores[0]++;
             console.log("scored1");
             this.update_status("scored");
+            console.log("players are " + this.players.length);
             this.lastscored = this.players[0];
             clearInterval(this.game_initializer);
         }
@@ -203,6 +221,8 @@ class Game {
             sec_paddle_y: this.sec_paddle_y,
             state: this.state,
             players: this.players,
+            players_avatar: this.players_avatar,
+            players_names: this.players_names,
             scores: this.scores,
             score_limit: this.score_limit,
             winner: this.winner,
@@ -217,31 +237,41 @@ class Game {
     }
 }
 let AppGateway = class AppGateway {
-    constructor() {
+    constructor(jwtService, prismaService) {
+        this.jwtService = jwtService;
+        this.prismaService = prismaService;
         this.logger = new common_1.Logger("AppGateway");
         this.queues = Array();
         this.live_games = Array();
         this.cpt = 0;
-        this.player_with_queue_id = new Map();
+        this.socket_with_queue_id = new Map();
+        this.user_with_queue_id = new Map();
     }
     afterInit(server) {
         this.server = server;
-        this.logger.log("INITIALIZED");
     }
-    handleConnection(client, ...args) {
-        this.logger.log(`User with the id  ${client.id} just logged in`);
+    async handleConnection(client, payload) {
+        const user = await this.getUserFromSocket(client);
+        const user_status = "ON";
+        const off_status = "OFF";
+        if (await this.get_user_status(user.id) === off_status)
+            await this.edit_user_status(user.id, user_status);
     }
-    handleDisconnect(player_ref) {
-        const player_id = this.player_with_queue_id.get(player_ref.id);
-        this.logger.log(`User with the id  ${player_ref.id} just logged out`);
-        if (this.player_with_queue_id.has(player_ref.id)) {
+    async handleDisconnect(player_ref) {
+        const player_id = this.socket_with_queue_id.get(player_ref.id);
+        const user = await this.getUserFromSocket(player_ref);
+        const user_id = this.user_with_queue_id.get(user.id);
+        const user_status = "INQUEUE";
+        const off_status = "OFF";
+        if (this.user_with_queue_id.has(user.id) && this.socket_with_queue_id.has(player_ref.id)) {
             this.queues[player_id].update_winner(player_ref.id);
             this.queues[player_id].update_status("disconnect");
             this.queues[player_id].emit_and_clear();
-            this.player_with_queue_id.delete(player_ref.id);
+            console.log("NUmber of players is " + this.queues[player_id].player_ids().length);
+            this.socket_with_queue_id.delete(player_ref.id);
+            this.user_with_queue_id.delete(user.id);
+            await this.edit_user_status(user.id, off_status);
         }
-        else
-            this.logger.log(`User with the id  ${player_ref.id} wasn't involved in any game`);
     }
     spectJoinRoom(socket) {
         let j = 0;
@@ -252,6 +282,7 @@ let AppGateway = class AppGateway {
         socket.emit('gameCount', j);
     }
     spectJoin(socket, payload) {
+        const user = this.getUserFromSocket(socket);
         let j = 0;
         let x = 0;
         for (let i = 0; i < this.queues.length; i++) {
@@ -264,31 +295,75 @@ let AppGateway = class AppGateway {
         socket.join(this.queues[x].room);
     }
     GameEnded(socket) {
-        console.log("GAME ENDED INDEEEEED" + socket.id);
     }
-    joinRoom(socket) {
-        const room_id = socket.id;
-        if (this.queues.length === 0) {
-            this.queues.push(new Game(this.server));
-            this.queues[0].update_room(room_id);
+    async edit_user_status(user_id, status) {
+        await this.prismaService.user.update({
+            where: { id: user_id },
+            data: {
+                status: status,
+            }
+        });
+    }
+    async get_user_status(user_id) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id: user_id }
+        });
+        const user_status = user.status;
+        return (user_status);
+    }
+    async joinRoom(socket) {
+        const user = await this.getUserFromSocket(socket);
+        const user_status = "INQUEUE";
+        const game_status = "INGAME";
+        console.log("My user is " + user.username);
+        const room_id = user.id;
+        if (!this.user_with_queue_id.has(user.id)) {
+            console.log("Here  " + user.username);
+            await this.edit_user_status(user.id, user_status);
+            this.getUserFromSocket(socket);
+            if (this.queues.length === 0) {
+                this.queues.push(new Game(this.server));
+                this.queues[0].update_room(room_id);
+                socket.join(room_id);
+            }
+            else if (this.queues[this.queues.length - 1].player_ids().length === 2) {
+                this.queues.push(new Game(this.server));
+                this.queues[this.queues.length - 1].update_room(room_id);
+                socket.join(room_id);
+            }
+            else if (this.queues[this.queues.length - 1].player_ids().length === 1) {
+                socket.join(this.queues[this.queues.length - 1].room);
+                this.cpt++;
+            }
+            this.queues[this.queues.length - 1].push_player(socket.id, user.avatar, user.username);
+            this.queues[this.queues.length - 1].check_players_are_ready();
+            this.socket_with_queue_id.set(socket.id, this.queues.length - 1);
+            this.user_with_queue_id.set(user.id, this.queues.length - 1);
+        }
+        else {
             socket.join(room_id);
         }
-        else if (this.queues[this.queues.length - 1].player_ids().length === 2) {
-            this.queues.push(new Game(this.server));
-            this.queues[this.queues.length - 1].update_room(room_id);
-            socket.join(room_id);
-        }
-        else if (this.queues[this.queues.length - 1].player_ids().length === 1) {
-            socket.join(this.queues[this.queues.length - 1].room);
-            this.cpt++;
-        }
-        this.queues[this.queues.length - 1].push_player(socket.id);
-        this.queues[this.queues.length - 1].check_players_are_ready();
-        this.player_with_queue_id.set(socket.id, this.queues.length - 1);
     }
-    handlePlayerInput(player_ref, payload) {
-        const player_id = this.player_with_queue_id.get(player_ref.id);
-        this.queues[player_id].player_activity(Object.assign(Object.assign({}, payload), { id: player_ref.id }));
+    async handlePlayerInput(player_ref, payload) {
+        const player_id = this.socket_with_queue_id.get(player_ref.id);
+        const user = await this.getUserFromSocket(player_ref);
+        const user_id = this.user_with_queue_id.get(user.id);
+        console.log("Hahwa user id o hahwa socket id " + user_id + "|" + player_id);
+        this.queues[user_id].player_activity(Object.assign(Object.assign({}, payload), { id: player_ref.id }));
+    }
+    async getUserFromSocket(socket) {
+        const cookies = socket.handshake.headers.cookie;
+        if (cookies) {
+            const token = cookies.split(';').find((c) => c.trim().startsWith('access_token='));
+            if (token) {
+                const payload = this.jwtService.decode(token.split('=')[1]);
+                const user = await this.prismaService.user.findUnique({
+                    where: { id: payload.id },
+                });
+                return user;
+            }
+        }
+        return null;
     }
 };
 __decorate([
@@ -313,20 +388,22 @@ __decorate([
     (0, websockets_1.SubscribeMessage)('player_join_queue'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AppGateway.prototype, "joinRoom", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('player_pressed_key'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AppGateway.prototype, "handlePlayerInput", null);
 AppGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)(5555, {
+    (0, websockets_1.WebSocketGateway)(4000, {
         cors: {
-            origin: '*',
+            credentials: true,
+            origin: 'http://localhost:3000',
         }
-    })
+    }),
+    __metadata("design:paramtypes", [jwt_1.JwtService, prisma_service_1.PrismaService])
 ], AppGateway);
 exports.AppGateway = AppGateway;
 //# sourceMappingURL=app.gateway.js.map
