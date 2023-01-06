@@ -13,6 +13,7 @@ import { useSearchParams } from "react-router-dom";
 import { stat } from "fs";
 import './../index.css';
 import './../App.css';
+import BackGround from '../pages/background.jpg'
 interface live_games {
     count: number;
 }
@@ -26,6 +27,15 @@ const Spectator = () => {
 
    const gameState = useRef(null as null | GameState);
 
+
+   const [user_one, setUserone] = useState("");
+   const [user_two, setUsertwo] = useState("");
+ 
+   const [user_one_score, setUserone_score] = useState(0);
+   const [user_two_score, setUsertwo_score] = useState(0);
+ 
+   const [user_one_name, setUserone_name] = useState("");
+   const [user_two_name, setUsertwo_name] = useState("");
 
   const [my_width, setWidth] = useState(window.innerWidth);
   const [m_height, setHeight] = useState(window.innerHeight);
@@ -102,7 +112,6 @@ const Spectator = () => {
         }
       }
 
-
         socket.current?.on("queue_status", (data: GameState) => {
           console.log("dkhlet hna tani "+layhfdk);
           if (state == "waiting") {
@@ -125,9 +134,80 @@ const Spectator = () => {
     p5.background(122);
   }
 
+  function User_avatar_one() {
+    if (gameState.current != null)
+      setUserone(gameState.current.players_avatar[0]);
+    
+     //console.log("heres my image"+ user_one);
+    const imageLink = user_one;
+  
+    return (
+      
+        <img className="flex-grow" src={imageLink} alt="description of image" />
+      
+    );
+  }
+
+  function User_avatar_two() {
+    if (gameState.current != null)
+      setUsertwo(gameState.current.players_avatar[1]);
+    
+     //console.log("heres my image"+ user_one);
+    const imageLink = user_two;
+  
+    return (
+        <img className="flex-grow" src={imageLink} alt="description of image" />
+    );
+  }
+
+  function Show_users_props() {
+    if (gameState.current != null)
+    {
+      setUserone_score(gameState.current.scores[0]);
+      setUsertwo_score(gameState.current.scores[1]);
+
+      setUserone_name(gameState.current.players_names[0]);
+      setUsertwo_name(gameState.current.players_names[1]);
+
+
+    }
+      
+    
+     //console.log("heres my image"+ user_one);
+    const user_fr_score = user_one_score;
+    const user_sec_score = user_two_score;
+
+    const user_fr_name = user_one_name;
+    const user_sec_name = user_two_name;
+  
+    return (
+        <div className="flex flex-row justify-between bg-transparent w-2/4   md:h-16 lg:h-24 xl:h-32 sm:h-24 ">
+        <div className="flex w-2/12 h-5/6 ">
+          <User_avatar_one />
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+          {user_fr_name}
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base text-white items-center justify-center">
+        {user_fr_score} - {user_sec_score}
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+          {user_sec_name}
+        </div>
+        <div className="flex justify-between align-end w-2/12 h-5/6">
+          <User_avatar_two />
+        </div>
+      </div>
+    );
+  }
+
+
   function draw(p5: p5Types)
     {
         socket.current?.emit("spectJoined");
+
+
+
         //console.log("nadi " + layhfdk); 
         p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
         p5.background(122);
@@ -141,6 +221,16 @@ const Spectator = () => {
             return getWindowSize().innerHeight;
           }
           if (gameState.current != null) {
+
+            setUserone(gameState.current.players_avatar[0]);
+            setUsertwo(gameState.current.players_avatar[1]);
+      
+            setUserone_score(gameState.current.scores[0]);
+            setUsertwo_score(gameState.current.scores[1]);
+      
+            setUserone_name(gameState.current.players_names[0]);
+            setUsertwo_name(gameState.current.players_names[1]);
+
             aspectRatio = gameState.current.aspectRatio;
       
             absoluteWidth = gameState.current.width;
@@ -252,15 +342,10 @@ const Spectator = () => {
     }
   
   //};
-  return <div className="canvas-container">
-    <div>
-
-        {Array.from({ length: layhfdk }, (v, i) => i + 1).map(i => (
-            <a href={`/watch/${i}`}><button key={i} onClick={() => buttonPressed(i)} >YAWDI HAAAANAAAAA {i}</button></a>
-        ))}
-    </div>
-    <Sketch setup={setup} draw={draw} />
-  </div>;
+  return <div className="flex flex-col items-center justify-center min-h-full md:shrink-0 w-full h-full absolute" style={{ backgroundImage: `url(${BackGround})` }}>
+            <Show_users_props/>
+            <Sketch setup={setup} draw={draw} />
+          </div>;
 };
 
 

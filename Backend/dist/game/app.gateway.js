@@ -254,23 +254,27 @@ let AppGateway = class AppGateway {
         const user = await this.getUserFromSocket(client);
         const user_status = "ON";
         const off_status = "OFF";
-        if (await this.get_user_status(user.id) === off_status)
-            await this.edit_user_status(user.id, user_status);
+        if (user) {
+            if (await this.get_user_status(user.id) === off_status)
+                await this.edit_user_status(user.id, user_status);
+        }
     }
     async handleDisconnect(player_ref) {
         const player_id = this.socket_with_queue_id.get(player_ref.id);
         const user = await this.getUserFromSocket(player_ref);
-        const user_id = this.user_with_queue_id.get(user.id);
-        const user_status = "INQUEUE";
-        const off_status = "OFF";
-        if (this.user_with_queue_id.has(user.id) && this.socket_with_queue_id.has(player_ref.id)) {
-            this.queues[player_id].update_winner(player_ref.id);
-            this.queues[player_id].update_status("disconnect");
-            this.queues[player_id].emit_and_clear();
-            console.log("NUmber of players is " + this.queues[player_id].player_ids().length);
-            this.socket_with_queue_id.delete(player_ref.id);
-            this.user_with_queue_id.delete(user.id);
-            await this.edit_user_status(user.id, off_status);
+        if (user) {
+            const user_id = this.user_with_queue_id.get(user.id);
+            const user_status = "INQUEUE";
+            const off_status = "OFF";
+            if (this.user_with_queue_id.has(user.id) && this.socket_with_queue_id.has(player_ref.id)) {
+                this.queues[player_id].update_winner(player_ref.id);
+                this.queues[player_id].update_status("disconnect");
+                this.queues[player_id].emit_and_clear();
+                console.log("NUmber of players is " + this.queues[player_id].player_ids().length);
+                this.socket_with_queue_id.delete(player_ref.id);
+                this.user_with_queue_id.delete(user.id);
+                await this.edit_user_status(user.id, off_status);
+            }
         }
     }
     spectJoinRoom(socket) {
@@ -282,7 +286,6 @@ let AppGateway = class AppGateway {
         socket.emit('gameCount', j);
     }
     spectJoin(socket, payload) {
-        const user = this.getUserFromSocket(socket);
         let j = 0;
         let x = 0;
         for (let i = 0; i < this.queues.length; i++) {
@@ -315,33 +318,35 @@ let AppGateway = class AppGateway {
         const user = await this.getUserFromSocket(socket);
         const user_status = "INQUEUE";
         const game_status = "INGAME";
-        console.log("My user is " + user.username);
-        const room_id = user.id;
-        if (!this.user_with_queue_id.has(user.id)) {
-            console.log("Here  " + user.username);
-            await this.edit_user_status(user.id, user_status);
-            this.getUserFromSocket(socket);
-            if (this.queues.length === 0) {
-                this.queues.push(new Game(this.server));
-                this.queues[0].update_room(room_id);
+        if (user) {
+            console.log("My user is " + user.username);
+            const room_id = user.id;
+            if (!this.user_with_queue_id.has(user.id)) {
+                console.log("Here  " + user.username);
+                await this.edit_user_status(user.id, user_status);
+                this.getUserFromSocket(socket);
+                if (this.queues.length === 0) {
+                    this.queues.push(new Game(this.server));
+                    this.queues[0].update_room(room_id);
+                    socket.join(room_id);
+                }
+                else if (this.queues[this.queues.length - 1].player_ids().length === 2) {
+                    this.queues.push(new Game(this.server));
+                    this.queues[this.queues.length - 1].update_room(room_id);
+                    socket.join(room_id);
+                }
+                else if (this.queues[this.queues.length - 1].player_ids().length === 1) {
+                    socket.join(this.queues[this.queues.length - 1].room);
+                    this.cpt++;
+                }
+                this.queues[this.queues.length - 1].push_player(socket.id, user.avatar, user.username);
+                this.queues[this.queues.length - 1].check_players_are_ready();
+                this.socket_with_queue_id.set(socket.id, this.queues.length - 1);
+                this.user_with_queue_id.set(user.id, this.queues.length - 1);
+            }
+            else {
                 socket.join(room_id);
             }
-            else if (this.queues[this.queues.length - 1].player_ids().length === 2) {
-                this.queues.push(new Game(this.server));
-                this.queues[this.queues.length - 1].update_room(room_id);
-                socket.join(room_id);
-            }
-            else if (this.queues[this.queues.length - 1].player_ids().length === 1) {
-                socket.join(this.queues[this.queues.length - 1].room);
-                this.cpt++;
-            }
-            this.queues[this.queues.length - 1].push_player(socket.id, user.avatar, user.username);
-            this.queues[this.queues.length - 1].check_players_are_ready();
-            this.socket_with_queue_id.set(socket.id, this.queues.length - 1);
-            this.user_with_queue_id.set(user.id, this.queues.length - 1);
-        }
-        else {
-            socket.join(room_id);
         }
     }
     async handlePlayerInput(player_ref, payload) {

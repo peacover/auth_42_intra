@@ -42,6 +42,13 @@ const SketchPong = () => {
   const [user_one, setUserone] = useState("");
   const [user_two, setUsertwo] = useState("");
 
+  const [user_one_score, setUserone_score] = useState(0);
+  const [user_two_score, setUsertwo_score] = useState(0);
+
+  const [user_one_name, setUserone_name] = useState("");
+  const [user_two_name, setUsertwo_name] = useState("");
+
+
   const [my_width, setWidth] = useState(window.innerWidth);
   const [m_height, setHeight] = useState(window.innerHeight);
 
@@ -208,11 +215,52 @@ const SketchPong = () => {
     const imageLink = user_two;
   
     return (
-      
         <img className="flex-grow" src={imageLink} alt="description of image" />
-      
     );
   }
+
+  function Show_users_props() {
+    if (gameState.current != null)
+    {
+      setUserone_score(gameState.current.scores[0]);
+      setUsertwo_score(gameState.current.scores[1]);
+
+      setUserone_name(gameState.current.players_names[0]);
+      setUsertwo_name(gameState.current.players_names[1]);
+
+
+    }
+      
+    
+     //console.log("heres my image"+ user_one);
+    const user_fr_score = user_one_score;
+    const user_sec_score = user_two_score;
+
+    const user_fr_name = user_one_name;
+    const user_sec_name = user_two_name;
+  
+    return (
+        <div className="flex flex-row justify-between bg-transparent w-2/4   md:h-16 lg:h-24 xl:h-32 sm:h-24 ">
+        <div className="flex w-2/12 h-5/6 ">
+          <User_avatar_one />
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+          {user_fr_name}
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base text-white items-center justify-center">
+        {user_fr_score} - {user_sec_score}
+        </div>
+        <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
+          {user_sec_name}
+        </div>
+        <div className="flex justify-between align-end w-2/12 h-5/6">
+          <User_avatar_two />
+        </div>
+      </div>
+    );
+  }
+
+
 
   function draw(p5: p5Types) {
     
@@ -227,6 +275,13 @@ const SketchPong = () => {
     if (gameState.current != null) {
       setUserone(gameState.current.players_avatar[0]);
       setUsertwo(gameState.current.players_avatar[1]);
+
+      setUserone_score(gameState.current.scores[0]);
+      setUsertwo_score(gameState.current.scores[1]);
+
+      setUserone_name(gameState.current.players_names[0]);
+      setUsertwo_name(gameState.current.players_names[1]);
+
       aspectRatio = gameState.current.aspectRatio;
 
       absoluteWidth = gameState.current.width;
@@ -290,39 +345,6 @@ const SketchPong = () => {
 
       
 
-      const drawScore = (p5: p5Types) => {
-        // this method will allow us to draw the score line of both players
-        // we start of by filling the whole screen black 
-        // we allign the text in the center and we can rectrieve the score of each players using the gamestate that is constantly
-        //retrieving data from the backend of our code and then we display it
-        // how to create as many buttons as i want based on a number 
-
-        p5.fill(0);
-        p5.textSize((getWindowSize().innerHeight * 20) / getWindowSize().innerHeight);
-        p5.textAlign(p5.CENTER);
-        //p5.resizeCanvas(getWindowSize().innerWidth, getWindowSize().innerHeight);
-        //console.log(relativeHeight);
-        if (gameState.current != null) {
-          p5.text(
-            gameState.current.scores[0],
-            (getWindowSize().innerWidth / 32) * 7,
-            getWindowSize().innerWidth / 8
-          );
-          p5.text(
-            gameState.current.scores[1],
-            (getWindowSize().innerWidth / 32) * 9,
-            getWindowSize().innerWidth / 8
-          );
-          if (gameState.current.state == "endGame") {
-            p5.text("Player 1 Won the game",
-              (getWindowSize().innerWidth) / 4,
-              getWindowSize().innerWidth / 16
-            );
-          }
-
-        }
-
-      };
       //p5.clear();
 
 
@@ -333,7 +355,7 @@ const SketchPong = () => {
       // p5.background(122);
       //console.log("Plyaer name is "+gameState.current.players_names[0]);
       drawClickToStartText(p5);
-      drawScore(p5);
+      p5.fill(0);
       
      //player_names(p5);
       //console.log("Heres my aspect ratio " + aspectRatio);
@@ -434,25 +456,12 @@ const SketchPong = () => {
             <Spectator/>
           </div>
           : <div className="flex flex-col items-center justify-center min-h-full md:shrink-0 w-full h-full absolute" style={{ backgroundImage: `url(${BackGround})` }}>
-          <div className="flex flex-row justify-between bg-transparent w-2/4   md:h-16 lg:h-24 xl:h-32 sm:h-24 ">
-            <div className="flex w-2/12 h-5/6 ">
-              <User_avatar_one />
-            </div>
-            <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
-              Ael-bagh
-            </div>
-            <div className="flex md:w-auto w-2/12 text-base text-white items-center justify-center">
-              2-1
-            </div>
-            <div className="flex md:w-auto w-2/12 text-base hover:text-gray-600 text-white items-center justify-center bg-gray-600 my-8 rounded-full hover:bg-white">
-              Aainhaja
-            </div>
-            <div className="flex justify-between align-end w-2/12 h-5/6">
-              <User_avatar_two />
-            </div>
-          </div>
-          <Sketch setup={setup} draw={draw} />
-        </div>)        
+              <Show_users_props/>
+              <Sketch setup={setup} draw={draw} />
+
+              
+
+            </div>)        
 
 
 

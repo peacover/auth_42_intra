@@ -8,6 +8,9 @@ const Home = () => {
             <Link to="/game">
                 game
             </Link>
+            <Link to="/watch">
+                watch
+            </Link>
         </>
     )
 }

@@ -448,8 +448,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const user_status : UserStatus = "ON";
     const off_status : UserStatus = "OFF";
     
-    if (await this.get_user_status(user.id) === off_status)
-      await this.edit_user_status(user.id, user_status);
+    if (user)
+    {
+      if (await this.get_user_status(user.id) === off_status)
+        await this.edit_user_status(user.id, user_status);     
+    }
+
     //console.log("New status after connecting is "+ await this.get_user_status(user.id));
 
     //this.logger.log(`User with the id  ${client.id} just logged in`);
@@ -460,26 +464,30 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const player_id: number = this.socket_with_queue_id.get(player_ref.id);
     
     const user = await this.getUserFromSocket(player_ref);
-    const user_id: number = this.user_with_queue_id.get(user.id);
-    const user_status : UserStatus = "INQUEUE";
-    const off_status : UserStatus = "OFF";
-    //this.logger.log(`User with the id  ${player_ref.id} just logged out`);
-    if (this.user_with_queue_id.has(user.id) && this.socket_with_queue_id.has(player_ref.id))
+    if (user)
     {
-      this.queues[player_id].update_winner(player_ref.id);
-      this.queues[player_id].update_status("disconnect");
-      this.queues[player_id].emit_and_clear();
+      const user_id: number = this.user_with_queue_id.get(user.id);
+      const user_status : UserStatus = "INQUEUE";
+      const off_status : UserStatus = "OFF";
+      //this.logger.log(`User with the id  ${player_ref.id} just logged out`);
+      if (this.user_with_queue_id.has(user.id) && this.socket_with_queue_id.has(player_ref.id))
+      {
+        this.queues[player_id].update_winner(player_ref.id);
+        this.queues[player_id].update_status("disconnect");
+        this.queues[player_id].emit_and_clear();
 
-      console.log("NUmber of players is "+this.queues[player_id].player_ids().length);
-      this.socket_with_queue_id.delete(player_ref.id);
-      this.user_with_queue_id.delete(user.id);
-      //this.queues[player_id].players.splice(user_id, 1);
+        console.log("NUmber of players is "+this.queues[player_id].player_ids().length);
+        this.socket_with_queue_id.delete(player_ref.id);
+        this.user_with_queue_id.delete(user.id);
+        //this.queues[player_id].players.splice(user_id, 1);
 
-      //this.queues[player_id].players.splice(user.id, 1);
-      //if (await this.get_user_status(user.id) === user_status)
-      await this.edit_user_status(user.id, off_status);
-     // console.log("New status before discornecting is "+ await this.get_user_status(user.id));
+        //this.queues[player_id].players.splice(user.id, 1);
+        //if (await this.get_user_status(user.id) === user_status)
+        await this.edit_user_status(user.id, off_status);
+      // console.log("New status before discornecting is "+ await this.get_user_status(user.id));
+      }      
     }
+
     // await this.edit_user_status(user.id, off_status);
     // console.log("New status before discornecting is "+ await this.get_user_status(user.id));
     // else 
@@ -503,7 +511,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('spectJoin')  
   spectJoin(socket: Socket,payload: any): void
   {
-    const user = this.getUserFromSocket(socket);
+    //const user = this.getUserFromSocket(socket);
     let j: number=0;
     let x: number=0;
 
@@ -555,51 +563,55 @@ async get_user_status(user_id : string){
     const user_status : UserStatus = "INQUEUE";
     const game_status : UserStatus = "INGAME";
 
-    console.log("My user is " + user.username);
-    const room_id: string = user.id;
-    if (!this.user_with_queue_id.has(user.id))
+    if (user)
     {
-      console.log("Here  "+user.username);
-      await this.edit_user_status(user.id, user_status);
-      //console.log("Hola " + user.status);
-      // this.edit_user_status(user.id, UserStatus.INQUEUE);
-      // console.log("Hola2 " + user.status);
-      // console.log(socket.handshake.headers);
-      // console.log("here");
-      this.getUserFromSocket(socket);
-      
-      
-      //const user = this.queues[0].prisma.user;
-      //const user = this.user_serv.get_user(req.user_ob);
-      
-      //console.log("3chiiiri "+this.queues[0].prisma);
-      
-      if (this.queues.length === 0)
+      console.log("My user is " + user.username);
+      const room_id: string = user.id;
+      if (!this.user_with_queue_id.has(user.id))
       {
-        this.queues.push(new Game(this.server));
-        this.queues[0].update_room(room_id);
-        socket.join(room_id);
-      } 
-      else if (this.queues[this.queues.length - 1].player_ids().length === 2)
+        console.log("Here  "+user.username);
+        await this.edit_user_status(user.id, user_status);
+        //console.log("Hola " + user.status);
+        // this.edit_user_status(user.id, UserStatus.INQUEUE);
+        // console.log("Hola2 " + user.status);
+        // console.log(socket.handshake.headers);
+        // console.log("here");
+        this.getUserFromSocket(socket);
+        
+        
+        //const user = this.queues[0].prisma.user;
+        //const user = this.user_serv.get_user(req.user_ob);
+        
+        //console.log("3chiiiri "+this.queues[0].prisma);
+        
+        if (this.queues.length === 0)
+        {
+          this.queues.push(new Game(this.server));
+          this.queues[0].update_room(room_id);
+          socket.join(room_id);
+        } 
+        else if (this.queues[this.queues.length - 1].player_ids().length === 2)
+        {
+          this.queues.push(new Game(this.server));
+          this.queues[this.queues.length - 1].update_room(room_id);
+          socket.join(room_id);
+        }
+        else if (this.queues[this.queues.length - 1].player_ids().length === 1)
+        {
+          socket.join(this.queues[this.queues.length - 1].room); 
+          this.cpt++;
+        }       
+        this.queues[this.queues.length - 1].push_player(socket.id, user.avatar, user.username);
+        this.queues[this.queues.length - 1].check_players_are_ready();
+        this.socket_with_queue_id.set(socket.id, this.queues.length - 1);
+        this.user_with_queue_id.set(user.id, this.queues.length - 1);
+      }
+      else 
       {
-        this.queues.push(new Game(this.server));
-        this.queues[this.queues.length - 1].update_room(room_id);
         socket.join(room_id);
       }
-      else if (this.queues[this.queues.length - 1].player_ids().length === 1)
-      {
-        socket.join(this.queues[this.queues.length - 1].room); 
-        this.cpt++;
-      }       
-      this.queues[this.queues.length - 1].push_player(socket.id, user.avatar, user.username);
-      this.queues[this.queues.length - 1].check_players_are_ready();
-      this.socket_with_queue_id.set(socket.id, this.queues.length - 1);
-      this.user_with_queue_id.set(user.id, this.queues.length - 1);
     }
-    else 
-    {
-      socket.join(room_id);
-    }
+   
     
   }
 

@@ -12,6 +12,8 @@ import  Spectator  from './components/spectator_mod';
 import  Home  from './pages/home';
 import  Login  from './pages/login';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Watching from './pages/watch';
+import Spect from './components/spectator';
 
 
 
@@ -24,6 +26,8 @@ function App() {
         <Route path='/watch/*' element={<Spectator/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/' element={<Home/>} />
+        <Route path='/watching' element={<Watching/>} />
+        <Route path='/spect' element={<Spect/>} />
       </Routes>
   </BrowserRouter>)
 
