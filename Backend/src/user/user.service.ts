@@ -187,8 +187,35 @@ export class UserService {
                         }
                     },
                 });
+                const updated_friend = await this.prisma.user.update({
+                    where: {id: friend.id },
+                    include: {friends : true},
+                    data: {
+                        friends: {
+                            connect: {
+                                id: user.id,
+                            }
+                        }
+                    },
+                });
                 res.json({message: 'success'});
             }
+    }
+    async get_friends(user : UserDto, @Res() res){
+        try{
+            const friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+                select: {
+                    friends: true,
+                }
+            });
+            res.json(friends.friends);
+        }
+        catch{
+            throw new HttpException('Error while getting friends', HttpStatus.BAD_REQUEST);
+        }
     }
     async upload(user_obj : UserDto, file) {
         try{

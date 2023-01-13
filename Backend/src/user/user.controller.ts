@@ -20,7 +20,7 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
-    @Patch('edit_username/:new_username')
+    @Post('edit_username/:new_username')
     change_username(@Req() req, @Param('new_username') new_username : string, @Res() res){
         // console.log(req);
         return this.userService.change_username(req.user_obj, new_username, res);
@@ -67,6 +67,12 @@ export class UserController {
     @Post('add_friend/:friend_name')
     add_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.add_friend(req.user_obj, param.friend_name, res);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('get_friends')
+    get_friends(@Req() req, @Res() res){
+        return this.userService.get_friends(req.user_obj, res);
     }
 
     @UseGuards(JwtGuard)
