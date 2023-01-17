@@ -20,10 +20,10 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
-    @Post('edit_username/:new_username')
-    change_username(@Req() req, @Param('new_username') new_username : string, @Res() res){
+    @Post('edit_full_name/:new_full_name')
+    change_full_name(@Req() req, @Param('new_full_name') new_full_name : string, @Res() res){
         // console.log(req);
-        return this.userService.change_username(req.user_obj, new_username, res);
+        return this.userService.change_full_name(req.user_obj, new_full_name, res);
     }
     
     @UseGuards(JwtGuard)
@@ -64,15 +64,33 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
-    @Post('add_friend/:friend_name')
+    @Post('add_friend/:friend_name') // friend username is passed as a param
     add_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.add_friend(req.user_obj, param.friend_name, res);
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('remove_friend/:friend_name')
+    remove_friend(@Req() req, @Param() param, @Res() res){
+        return this.userService.remove_friend(req.user_obj, param.friend_name, res);
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('block_friend/:friend_name')
+    block_friend(@Req() req, @Param() param, @Res() res){
+        return this.userService.block_friend(req.user_obj, param.friend_name, res);
     }
 
     @UseGuards(JwtGuard)
     @Get('get_friends')
     get_friends(@Req() req, @Res() res){
         return this.userService.get_friends(req.user_obj, res);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('status_friend/:friend_name')
+    status_friend(@Req() req, @Param() param, @Res() res){
+        return this.userService.status_friend(req.user_obj, param.friend_name, res);
     }
 
     @UseGuards(JwtGuard)
