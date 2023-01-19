@@ -86,6 +86,12 @@ export class UserController {
     block_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.block_friend(req.user_obj, param.friend_name, res);
     }
+
+    @UseGuards(JwtGuard)
+    @Post('unblock_friend/:friend_name')
+    unblock_friend(@Req() req, @Param() param, @Res() res){
+        return this.userService.unblock_friend(req.user_obj, param.friend_name, res);
+    }
     
     @UseGuards(JwtGuard)
     @Get('get_friends')
