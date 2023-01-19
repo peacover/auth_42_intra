@@ -20,10 +20,16 @@ export class UserController {
     }
 
     @UseGuards(JwtGuard)
-    @Post('edit_full_name/:new_full_name')
+    @Post('edit_full_name/:new_full_name') 
     change_full_name(@Req() req, @Param('new_full_name') new_full_name : string, @Res() res){
         // console.log(req);
         return this.userService.change_full_name(req.user_obj, new_full_name, res);
+    }
+    
+    @UseGuards(JwtGuard)
+    @Get('user')
+    get_user(@Req() req, @Res() res){     
+        return this.userService.get_user_all(req.user_obj, res);
     }
     
     @UseGuards(JwtGuard)
@@ -31,68 +37,75 @@ export class UserController {
     get_user_score(@Req() req, @Res() res){
         return this.userService.get_user_score(req.user_obj, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('logout')
     logout(@Req() req, @Res({ passthrough: true }) res){
         this.userService.edit_user_status(req.user_obj, UserStatus.OFF);
         res.clearCookie('access_token');
     }
-
+    
     @UseGuards(JwtGuard)
     @Post('in_queue')
     edit_user_status(@Req() req){
         return this.userService.edit_user_status(req.user_obj, UserStatus.INQUEUE);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('achievements')
     get_user_achievements(@Req() req, @Res() res){
         return this.userService.get_user_achievements(req.user_obj, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('leaderboard')
     get_leaderboard(@Res() res){
         return this.userService.get_leaderboard(res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('friends')
     get_user_friends(@Req() req, @Res() res){
         return this.userService.get_user_friends(req.user_obj, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Post('add_friend/:friend_name') // friend username is passed as a param
     add_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.add_friend(req.user_obj, param.friend_name, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Post('remove_friend/:friend_name')
     remove_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.remove_friend(req.user_obj, param.friend_name, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Post('block_friend/:friend_name')
     block_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.block_friend(req.user_obj, param.friend_name, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('get_friends')
     get_friends(@Req() req, @Res() res){
         return this.userService.get_friends(req.user_obj, res);
     }
-
+    
     @UseGuards(JwtGuard)
     @Get('status_friend/:friend_name')
     status_friend(@Req() req, @Param() param, @Res() res){
         return this.userService.status_friend(req.user_obj, param.friend_name, res);
     }
-
+    
+    @UseGuards(JwtGuard)
+    @Get('user/:whichone')
+    async get_which_one(@Req() req, @Param() param, @Res() res)
+    {
+        return this.userService.get_which_friend(req.user_obj, param.whichone ,res);
+    }
+    
     @UseGuards(JwtGuard)
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
@@ -105,20 +118,20 @@ export class UserController {
             maxSize: 10 * 1000000,
         })
         .build({
-        errorHttpStatusCode: HttpStatus.UNAUTHORIZED,
+            errorHttpStatusCode: HttpStatus.UNAUTHORIZED,
         }),
-    ) file) {
-        return await this.userService.upload(req.user_obj, file);
+        ) file) {
+            return await this.userService.upload(req.user_obj, file);
+        }
+        // edit username: DONE!
+        // edit avatar: DONE!
+        // leaderboard: DONE!
+        // history games: DEPENDS ON GAME
+        // achievements: DONE!
+        // add friends: DONE!
+        // stats of friends: DONE!
+        // calcul of score: DONE!
+        
+        
+        //add friend in both relations && post req
     }
-    // edit username: DONE!
-    // edit avatar: DONE!
-    // leaderboard: DONE!
-    // history games: DEPENDS ON GAME
-    // achievements: DONE!
-    // add friends: DONE!
-    // stats of friends: DONE!
-    // calcul of score: DONE!
-
-
-    //add friend in both relations && post req
-}

@@ -29,6 +29,41 @@ export class UserService {
             throw new HttpException("Error while updating username", HttpStatus.BAD_REQUEST);
         }
     }
+    async get_user_all(user_obj : UserDto, @Res() res)
+    {
+        // console.log(user);
+        const user = await this.prisma.user.findUnique({
+            where:{
+                id : user_obj.id,
+            }
+        });
+        console.log("ayoub dima khdam : " + user.username);
+        res.json(user);
+    }
+    async get_which_friend(user_obj, which_friend: string, @Res() res)
+    {
+        const user_nb = await this.prisma.user.count({
+            where: {
+                username : which_friend,
+            }
+        });     
+        if (user_nb == 0){
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        else{
+            const user_friend = await this.prisma.user.findFirst({
+                where: {
+                    username : which_friend,
+                }
+            });
+            res.json(user_friend);
+        }
+        // if (){
+        //     throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        // }
+        // else{
+        // }
+    }
     async get_user_score(user_obj : UserDto, @Res() res){
         try{
             const user = await this.get_user(user_obj.id);
