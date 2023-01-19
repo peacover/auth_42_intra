@@ -78,9 +78,7 @@ export class AuthService {
                     secret,
                     otpauthUrl
                 })
-
         }
-        
         catch{
             throw new HttpException("User not found!", 400);
         }
@@ -93,7 +91,8 @@ export class AuthService {
             }
           });
     }
-    async pipeQrCodeStream(@Res() res, otpauthUrl: string) {
+    async generate_qr_code(user_obj, @Res() res) {
+        const {otpauthUrl} = await this.generate_2fa_secret(user_obj, res);
         return toFileStream(res, otpauthUrl);
     }
 
