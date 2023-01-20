@@ -15,7 +15,10 @@
   align-items: center;
   justify-content: center;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> auth_master
 }
 
 
@@ -24,5 +27,8 @@
   height: 100vh;
   top:0%;  /* positions the top edge of the component 10px below its normal position */
   left: 25%; /* positions the left edge of the component 20px to the right of its normal position */
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
 }

@@ -2,6 +2,10 @@
   "name": "my-pong-frontend",
   "version": "0.1.0",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  "main": "index.tsx",
+>>>>>>> auth_master
 =======
   "main": "index.tsx",
 >>>>>>> auth_master
@@ -14,10 +18,13 @@
     "@types/node": "^16.18.9",
     "@types/react": "^18.0.26",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "@types/react-dom": "^18.0.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
 =======
+=======
+>>>>>>> auth_master
     "@types/react-dom": "^18.0.10",
     "@types/react-modal": "^3.13.1",
     "axios": "^1.2.2",
@@ -27,13 +34,22 @@
     "react-icons": "^4.7.1",
     "react-input-verification-code": "^1.0.2",
     "react-modal": "^3.16.1",
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
     "react-p5": "^1.3.31",
     "react-p5-wrapper": "^3.4.0",
     "react-router-dom": "^6.5.0",
     "react-scripts": "5.0.1",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "socket.io-client": "^4.5.4",
+=======
+    "react-toastify": "^9.1.1",
+    "socket.io-client": "^4.5.4",
+    "sweetalert2": "^11.7.0",
+>>>>>>> auth_master
 =======
     "react-toastify": "^9.1.1",
     "socket.io-client": "^4.5.4",
@@ -66,7 +82,10 @@
       "last 1 safari version"
     ]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> auth_master
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
@@ -77,6 +96,9 @@
     "sass-loader": "^13.2.0",
     "tailwindcss": "^3.2.4",
     "webpack": "^5.75.0"
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
   }
 }

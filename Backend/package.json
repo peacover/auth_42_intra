@@ -57,6 +57,7 @@
     "rxjs": "^7.8.0",
     "rxjs-compat": "^6.6.7",
     "sharp": "^0.31.2",
+    "socket.io": "^4.5.4",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

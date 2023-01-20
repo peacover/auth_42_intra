@@ -73,7 +73,11 @@ const Spectator = () => {
 
   useEffect(() => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     socket.current = io("http://localhost:5555").on("connect", () => {
+=======
+    socket.current = io("http://localhost:4000").on("connect", () => {
+>>>>>>> auth_master
 =======
     socket.current = io("http://localhost:4000").on("connect", () => {
 >>>>>>> auth_master

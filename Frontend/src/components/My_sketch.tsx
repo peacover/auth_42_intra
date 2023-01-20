@@ -1,6 +1,10 @@
 import React from "react";
 import Sketch from "react-p5";
 import p5Types from "p5";
+<<<<<<< HEAD
+=======
+import axios from 'axios';
+>>>>>>> auth_master
 
 import P5Wrapper from 'react-p5';
 import p5 from 'p5';
@@ -15,6 +19,25 @@ import  Spectator  from './spectator_mod';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
+<<<<<<< HEAD
+=======
+  
+  // await axios.get( process.env.REACT_APP_BACKEND_URL+ "/chat/myChannels", 
+  // {withCredentials: true} 
+  // ).then((res)=>{
+  //   var myChannels : Array<string> = [];
+  //   for (let index = 0; index < res.data.length; index++) {
+  //     myChannels.push(res.data[index].channelId);
+  //   }
+  //   myChannels.push(userLogin);
+  //   // mychannels.pushback(userlogin)
+  //   socket.emit('joinRoom', myChannels)
+  // }).catch((err)=>{
+  // })
+  //}
+
+
+>>>>>>> auth_master
 const SketchPong = () => {
 
   const socket = useRef(null as null | Socket);
@@ -34,7 +57,10 @@ const SketchPong = () => {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> auth_master
 =======
 >>>>>>> auth_master
   let ok = 0;
@@ -57,7 +83,11 @@ const SketchPong = () => {
   function buttonPressed(nbr: number) {
     button_cpt = 1;
 <<<<<<< HEAD
+<<<<<<< HEAD
     console.log("nbr " + nbr);
+=======
+    //console.log("nbr " + nbr);
+>>>>>>> auth_master
 =======
     //console.log("nbr " + nbr);
 >>>>>>> auth_master
@@ -70,9 +100,12 @@ const SketchPong = () => {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   useEffect(() => {
     socket.current = io("http://localhost:5555").on("connect", () => {
 =======
+=======
+>>>>>>> auth_master
 
   useEffect(() => {
 
@@ -80,6 +113,9 @@ const SketchPong = () => {
     socket.current = io("http://localhost:4000", {
       withCredentials: true,
     }).on("connect", () => {
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
 
     if (socket.current != null)
@@ -88,7 +124,11 @@ const SketchPong = () => {
         hh = data;
         setLayhfdk(+ data);
 <<<<<<< HEAD
+<<<<<<< HEAD
         console.log("wch a 3chiri " + layhfdk);
+=======
+        //console.log("wch a 3chiri " + layhfdk);
+>>>>>>> auth_master
 =======
         //console.log("wch a 3chiri " + layhfdk);
 >>>>>>> auth_master
@@ -105,7 +145,11 @@ const SketchPong = () => {
             hh = data;
             setLayhfdk(+ data);
 <<<<<<< HEAD
+<<<<<<< HEAD
             console.log("wch a 3chiri " + layhfdk);
+=======
+            //console.log("wch a 3chiri " + layhfdk);
+>>>>>>> auth_master
 =======
             //console.log("wch a 3chiri " + layhfdk);
 >>>>>>> auth_master
@@ -129,10 +173,13 @@ const SketchPong = () => {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
     
 =======
+=======
+>>>>>>> auth_master
   const setup_2 = (p5: p5Types,canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth/4 , (window.innerWidth / 8)).parent(canvasParentRef)
 
@@ -189,6 +236,9 @@ const SketchPong = () => {
   const setup = (p5: p5Types,canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
 
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
     p5.background(122);
 
@@ -215,7 +265,11 @@ const SketchPong = () => {
 
       scalingRatio = relativeWidth / absoluteWidth;
 <<<<<<< HEAD
+<<<<<<< HEAD
       console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
+=======
+      //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
+>>>>>>> auth_master
 =======
       //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
 >>>>>>> auth_master
@@ -225,6 +279,11 @@ const SketchPong = () => {
     p5.background(122);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    
+
+>>>>>>> auth_master
 =======
     
 
@@ -272,6 +331,11 @@ const SketchPong = () => {
       };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+      
+
+>>>>>>> auth_master
 =======
       
 
@@ -318,16 +382,22 @@ const SketchPong = () => {
       // p5.resizeCanvas(getWindowSize().innerWidth   , relativeHeight);
       // p5.background(122);
 <<<<<<< HEAD
+<<<<<<< HEAD
       drawClickToStartText(p5);
       drawScore(p5);
       console.log("Heres my aspect ratio " + aspectRatio);
 =======
+=======
+>>>>>>> auth_master
       //console.log("Plyaer name is "+gameState.current.players_names[0]);
       drawClickToStartText(p5);
       drawScore(p5);
       
      //player_names(p5);
       //console.log("Heres my aspect ratio " + aspectRatio);
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
       //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
       p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
@@ -426,14 +496,20 @@ const SketchPong = () => {
             <Spectator/>
           </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
           : <div className="canvas-container"><Sketch setup={setup} draw={draw}  /></div>)
 =======
+=======
+>>>>>>> auth_master
           : <div className="canvas-container">
             <div className="component1">
               <Sketch setup={setup_2} draw={draw_2}  />
             </div>
             <Sketch setup={setup} draw={draw}  />
             </div>)
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
 
 

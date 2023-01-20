@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import React from 'react';
 import { FunctionComponent, useEffect, useState , useRef} from "react";
 import Sketch  from "react-p5";
@@ -28,6 +29,8 @@ function App() {
   
  export default App
 =======
+=======
+>>>>>>> auth_master
 import React, { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
@@ -75,5 +78,8 @@ console.log("ayoub zab : " + state.is_two_fa_enable);
 }
   
  export default App;
+<<<<<<< HEAD
+>>>>>>> auth_master
+=======
 >>>>>>> auth_master
 
