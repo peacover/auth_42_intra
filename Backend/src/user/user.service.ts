@@ -233,7 +233,7 @@ export class UserService {
             }
             
             for (let i = 0; i < friend_blocked.blocked.length; i++){
-                console.log(friend_blocked.blocked[i].username + " | " + user.username)
+                // console.log(friend_blocked.blocked[i].username + " | " + user.username)
                 if (friend_blocked.blocked[i].username == user.username){
                     throw new HttpException('You have been blocked', HttpStatus.BAD_REQUEST);
                 }
@@ -489,22 +489,17 @@ export class UserService {
                     }
                 },
             });
-            // const updated_friend = await this.prisma.user.update({
-            //     where: {id: block_friend.id },
-            //     include: {friends : true},
-            //     data: {
-            //         blocked: {
-            //             connect: {
-            //                 id: user_req.id,
-            //             }
-            //         },
-            //         friends: {
-            //             disconnect: {
-            //                 id: user_req.id,
-            //             }
-            //         }
-            //     },
-            // });
+            const updated_friend = await this.prisma.user.update({
+                where: {id: block_friend.id },
+                include: {friends : true},
+                data: {
+                    friends: {
+                        disconnect: {
+                            id: user_req.id,
+                        }
+                    }
+                },
+            });
             res.json({message: 'success'});
         }
     }
@@ -519,6 +514,7 @@ export class UserService {
         }
         else{
             let status : string = "friend";
+            const user = await this.get_user(user_req.id);
             const friend = await this.prisma.user.findFirst({
                 where: {
                     username : friend_name,
@@ -532,9 +528,17 @@ export class UserService {
                     friends: true,
                 }
             });
-            const blocked_friends = await this.prisma.user.findUnique({
+            const user_blocked = await this.prisma.user.findUnique({
                 where: {
                     id: user_req.id,
+                },
+                select: {
+                    blocked: true,
+                }
+            });
+            const friend_blocked = await this.prisma.user.findUnique({
+                where: {
+                    id: friend.id,
                 },
                 select: {
                     blocked: true,
@@ -551,8 +555,14 @@ export class UserService {
                 status = 'not_friend';
             }
             let blocked_friend_found = false;
-            for (let i = 0; i < blocked_friends.blocked.length; i++){
-                if (blocked_friends.blocked[i].username == friend_name){
+            for (let i = 0; i < user_blocked.blocked.length; i++){
+                if (user_blocked.blocked[i].username == friend_name){
+                    blocked_friend_found = true;
+                    break;
+                }
+            }
+            for (let i = 0; i < friend_blocked.blocked.length; i++){
+                if (friend_blocked.blocked[i].username == user.username){
                     blocked_friend_found = true;
                     break;
                 }
