@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('OWNER', 'ADMIN', 'MEMBER');
 
 -- CreateEnum
-CREATE TYPE "TypeChat" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
+CREATE TYPE "ACCESS" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED', 'DM');
 
 -- CreateEnum
 CREATE TYPE "UserStatus" AS ENUM ('ON', 'OFF', 'INGAME', 'INQUEUE');
@@ -40,35 +40,37 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Chat" (
+CREATE TABLE "Room" (
     "id" SERIAL NOT NULL,
-    "name" TEXT,
-    "type" "TypeChat" NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" "ACCESS" NOT NULL,
     "password" TEXT,
 
-    CONSTRAINT "Chat_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Room_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "ChatUser" (
-    "chat_id" INTEGER NOT NULL,
+CREATE TABLE "RoomUser" (
+    "Room_id" INTEGER NOT NULL,
     "user_id" TEXT NOT NULL,
     "role" "Role" NOT NULL,
-    "is_muted" BOOLEAN NOT NULL,
-    "mute_time" "MuteTime",
+    "mute_time" TIMESTAMP(3) NOT NULL,
     "is_banned" BOOLEAN NOT NULL,
 
-    CONSTRAINT "ChatUser_pkey" PRIMARY KEY ("chat_id","user_id")
+    CONSTRAINT "RoomUser_pkey" PRIMARY KEY ("Room_id","user_id")
 );
 
 -- CreateTable
 CREATE TABLE "MessageUser" (
-    "chat_id" INTEGER NOT NULL,
+    "Message_id" SERIAL NOT NULL,
+    "room_id" INTEGER NOT NULL,
     "user_id" TEXT NOT NULL,
-    "text" TEXT NOT NULL,
+    "avatar" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "MessageUser_pkey" PRIMARY KEY ("chat_id","user_id")
+    CONSTRAINT "MessageUser_pkey" PRIMARY KEY ("Message_id")
 );
 
 -- CreateTable
@@ -113,16 +115,10 @@ CREATE UNIQUE INDEX "_friends_AB_unique" ON "_friends"("A", "B");
 CREATE INDEX "_friends_B_index" ON "_friends"("B");
 
 -- AddForeignKey
-ALTER TABLE "ChatUser" ADD CONSTRAINT "ChatUser_chat_id_fkey" FOREIGN KEY ("chat_id") REFERENCES "Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RoomUser" ADD CONSTRAINT "RoomUser_Room_id_fkey" FOREIGN KEY ("Room_id") REFERENCES "Room"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatUser" ADD CONSTRAINT "ChatUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "MessageUser" ADD CONSTRAINT "MessageUser_chat_id_fkey" FOREIGN KEY ("chat_id") REFERENCES "Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "MessageUser" ADD CONSTRAINT "MessageUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RoomUser" ADD CONSTRAINT "RoomUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_user1_id_fkey" FOREIGN KEY ("user1_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

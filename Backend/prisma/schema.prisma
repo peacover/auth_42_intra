@@ -31,8 +31,7 @@ model User {
   blocked User[] @relation("blocked")
   blockedRelation User[] @relation("blocked")
 
-  chats ChatUser[]
-  messages MessageUser[]
+  chats RoomUser[]
   player1 Game[] @relation("player1")
   player2 Game[] @relation("player2")
   friends User[] @relation("friends")
@@ -46,7 +45,6 @@ model Room{
   password String?
 
   users RoomUser[]
-  messages MessageUser[]
 }
 
 model RoomUser{
@@ -63,14 +61,17 @@ model RoomUser{
 }
 
 model MessageUser{
-  chat_id Int
-  chat Chat @relation(fields: [chat_id], references: [id])
-  user_id String
-  user User @relation(fields: [user_id], references: [id])
-  text String
-  time DateTime @default(now())
+  Message_id Int @id @default(autoincrement())
+  room_id Int
 
-  @@id([chat_id, user_id])
+  user_id String
+
+  avatar String
+
+  username String
+
+  content String
+  time DateTime @default(now())
 }
 
 model Game{

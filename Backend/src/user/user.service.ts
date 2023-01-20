@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Achievement, Role, UserStatus } from '@prisma/client';
+import { Achievement, Role, UserStatus, ACCESS } from '@prisma/client';
 import { PrismaService } from "src/prisma/prisma.service";
 import { UserDto } from './dto';
-import { S3 } from 'aws-sdk';
+import { AccessAnalyzer, S3 } from 'aws-sdk';
 import crypto = require('crypto');
 import { log } from 'console';
 
@@ -274,37 +274,37 @@ export class UserService {
                     }
                 },
             });
-            // this.create_dm_room(user, friend);
+            this.create_dm_room(user, friend);
             res.json({message: 'success'});
         }
     }
-    // async create_dm_room(user : UserDto, friend: UserDto){
-    //     const room = await this.prisma.room.create({
-    //         data: {
-    //           name: user.username + " - " + friend.username,
-    //           type: Type.DM,
-    //         }
-    //       });
+    async create_dm_room(user, friend){
+        const room = await this.prisma.room.create({
+            data: {
+              name: user.username + " - " + friend.username,
+              type: ACCESS.DM,
+            }
+          });
     
-    //       const roomuser = await this.prisma.roomUser.create({
-    //         data: {
-    //           user_id: user.id,
-    //           Room_id: room.id,
-    //           role: Role.MEMBER,
-    //           is_banned: false,
-    //           mute_time: new Date(),
-    //         }
-    //       });
-    //       const roomuser2 = await this.prisma.roomUser.create({
-    //         data: {
-    //           user_id: friend.id,
-    //           Room_id: room.id,
-    //           role: Role.MEMBER,
-    //           is_banned: false,
-    //           mute_time: new Date(),
-    //         }
-    //       });
-    // }
+          const roomuser = await this.prisma.roomUser.create({
+            data: {
+              user_id: user.id,
+              Room_id: room.id,
+              role: Role.MEMBER,
+              is_banned: false,
+              mute_time: new Date(),
+            }
+          });
+          const roomuser2 = await this.prisma.roomUser.create({
+            data: {
+              user_id: friend.id,
+              Room_id: room.id,
+              role: Role.MEMBER,
+              is_banned: false,
+              mute_time: new Date(),
+            }
+          });
+    }
     async get_friends(user : UserDto, @Res() res){
         try{
             const friends = await this.prisma.user.findUnique({
