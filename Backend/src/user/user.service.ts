@@ -11,16 +11,16 @@ import { log } from 'console';
 export class UserService {
     constructor(private prisma: PrismaService, private config: ConfigService){
     }
-    async change_username(user : UserDto, new_username : string, @Res() res){
+    async change_full_name(user, new_full_name : string, @Res() res){
         try{
-            console.log(new_username);
+            console.log(new_full_name);
             
             await this.prisma.user.update({
                     where: {
                         id: user.id,
                     },
                     data: {
-                        username: new_username,
+                        full_name: new_full_name,
                     }
             });
             res.json({message: "success!"});
@@ -149,46 +149,86 @@ export class UserService {
         }
     }
     async add_friend(user : UserDto, friend_name : string, @Res() res){
-            const nb_user : number = await this.prisma.user.count({
-                where:{
-                    username: friend_name,
+        const nb_user : number = await this.prisma.user.count({
+            where:{
+                username: friend_name,
+            }
+        });
+        if (nb_user == 0){
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+        else if (nb_user == 1){
+            const friend = await this.prisma.user.findFirst({
+                where: {
+                    username : friend_name,
                 }
             });
-            if (nb_user == 0){
-                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-            }
-            else if (nb_user == 1){
-                const friend = await this.prisma.user.findFirst({
-                    where: {
-                        username : friend_name,
-                    }
-                });
-                const user_friends = await this.prisma.user.findUnique({
-                    where: {
-                        id: user.id,
-                    },
-                    select: {
-                        friends: true,
-                    }
-                });
-                for (let i = 0; i < user_friends.friends.length; i++){
-                    if (user_friends.friends[i].username == friend_name){
-                        throw new HttpException('Friend already added', HttpStatus.BAD_REQUEST);
-                    }
+            const user_friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+                select: {
+                    friends: true,
                 }
-                const updated_user = await this.prisma.user.update({
-                    where: {id: user.id },
-                    include: {friends : true},
-                    data: {
-                        friends: {
-                            connect: {
-                                id: friend.id,
-                            }
-                        }
-                    },
-                });
-                res.json({message: 'success'});
+            });
+            const blocked_friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+                select: {
+                    blocked: true,
+                }
+            });
+            for (let i = 0; i < blocked_friends.blocked.length; i++){
+                if (blocked_friends.blocked[i].username == friend_name){
+                    throw new HttpException('User blocked', HttpStatus.BAD_REQUEST);
+                }
             }
+            for (let i = 0; i < user_friends.friends.length; i++){
+                if (user_friends.friends[i].username == friend_name){
+                    throw new HttpException('Friend already added', HttpStatus.BAD_REQUEST);
+                }
+            }
+            const updated_user = await this.prisma.user.update({
+                where: {id: user.id },
+                include: {friends : true},
+                data: {
+                    friends: {
+                        connect: {
+                            id: friend.id,
+                        }
+                    }
+                },
+            });
+            const updated_friend = await this.prisma.user.update({
+                where: {id: friend.id },
+                include: {friends : true},
+                data: {
+                    friends: {
+                        connect: {
+                            id: user.id,
+                        }
+                    }
+                },
+            });
+            res.json({message: 'success'});
+        }
+    }
+    async get_friends(user : UserDto, @Res() res){
+        try{
+            const friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+                select: {
+                    friends: true,
+                }
+            });
+            res.json(friends.friends);
+        }
+        catch{
+            throw new HttpException('Error while getting friends', HttpStatus.BAD_REQUEST);
+        }
     }
     async upload(user_obj : UserDto, file) {
         try{
@@ -260,11 +300,14 @@ export class UserService {
             }
           });
         if (old_avatar_key != null){
-            var params = { Bucket: bucket, Key: old_avatar_key };  
-            s3.deleteObject(params, function(err, data) {
-            if (err) console.log(err, err.stack);  // error
-            else     console.log();                 // deleted
-            });
+            var params = { Bucket: bucket, Key: old_avatar_key };
+            // delete object from s3
+            
+
+            // s3.deleteObject(params, function(err, data) {
+            // if (err) console.log(err, err.stack);  // error
+            // else     console.log();                 // deleted
+            // });
         }
     }
     async get_user_friends(user : UserDto, @Res() res){
@@ -283,7 +326,191 @@ export class UserService {
             throw new HttpException('Error while getting friends', HttpStatus.BAD_REQUEST);
         }
     }
+    async remove_friend(user , friend_name : string, @Res() res){
+        const user_nb = await this.prisma.user.count({
+            where: {
+                username : friend_name,
+            }
+        });            
+        if (user_nb == 0){
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        else{
+            const friend = await this.prisma.user.findFirst({
+                where: {
+                    username : friend_name,
+                }
+            });
+            const user_friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+                select: {
+                    friends: true,
+                }
+            });
+            let friend_found = false;
+            for (let i = 0; i < user_friends.friends.length; i++){
+                if (user_friends.friends[i].username == friend_name){
+                    friend_found = true;
+                    break;
+                }
+            }
+            if (friend_found == false){
+                throw new HttpException('Friend not found', HttpStatus.BAD_REQUEST);
+            }
+            const updated_user = await this.prisma.user.update({
+                where: {id: user.id },
+                include: {friends : true},
+                data: {
+                    friends: {
+                        disconnect: {
+                            id: friend.id,
+                        }
+                    }
+                },
+            });
+            const updated_friend = await this.prisma.user.update({
+                where: {id: friend.id },
+                include: {friends : true},
+                data: {
+                    friends: {
+                        disconnect: {
+                            id: user.id,
+                        }
+                    }
+                },
+            });
+            res.json({message: 'success'});
+        }
+    }
+    async block_friend(user_req , friend_name : string, @Res() res){
+        const user_nb = await this.prisma.user.count({
+            where: {
+                username : friend_name,
+            }
+        });            
+        if (user_nb == 0){
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        else{
+            const block_friend = await this.prisma.user.findFirst({
+                where: {
+                    username : friend_name,
+                }
+            });
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    id: user_req.id,
+                },
+                select: {
+                    blocked: true,
+                }
+            });
+            let blocked_friend_found = false;
+            for (let i = 0; i < user.blocked.length; i++){
+                if (user.blocked[i].username == friend_name){
+                    blocked_friend_found = true;
+                    break;
+                }
+            }
+            if (blocked_friend_found == true){
+                throw new HttpException('Friend already blocked', HttpStatus.BAD_REQUEST);
+            }
+            const updated_user = await this.prisma.user.update({
+                where: {id: user_req.id },
+                include: {blocked : true},
+                data: {
+                    blocked: {
+                        connect: {
+                            id: block_friend.id,
+                        }
+                    },
+                    friends: {
+                        disconnect: {
+                            id: block_friend.id,
+                        }
+                    }
+                },
+            });
+            const updated_friend = await this.prisma.user.update({
+                where: {id: block_friend.id },
+                include: {friends : true},
+                data: {
+                    blocked: {
+                        connect: {
+                            id: user_req.id,
+                        }
+                    },
+                    friends: {
+                        disconnect: {
+                            id: user_req.id,
+                        }
+                    }
+                },
+            });
+            res.json({message: 'success'});
+        }
+    }
+    async status_friend(user_req , friend_name : string, @Res() res){
+        const user_nb = await this.prisma.user.count({
+            where: {
+                username : friend_name,
+            }
+        });            
+        if (user_nb == 0){
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        else{
+            let status : string = "friend";
+            const friend = await this.prisma.user.findFirst({
+                where: {
+                    username : friend_name,
+                }
+            });
+            const user_friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user_req.id,
+                },
+                select: {
+                    friends: true,
+                }
+            });
+            const blocked_friends = await this.prisma.user.findUnique({
+                where: {
+                    id: user_req.id,
+                },
+                select: {
+                    blocked: true,
+                }
+            });
+            let friend_found = false;
+            for (let i = 0; i < user_friends.friends.length; i++){
+                if (user_friends.friends[i].username == friend_name){
+                    friend_found = true;
+                    break;
+                }
+            }
+            if (friend_found == false){
+                status = 'not_friend';
+            }
+            let blocked_friend_found = false;
+            for (let i = 0; i < blocked_friends.blocked.length; i++){
+                if (blocked_friends.blocked[i].username == friend_name){
+                    blocked_friend_found = true;
+                    break;
+                }
+            }
+            if (blocked_friend_found == true){
+                status = 'blocked';
+            }
+            res.json({message: 'success', status: status});
+        }
+    }
 }
+
+
+
 
 // "Action": [
 //     "s3:AbortMultipartUpload",

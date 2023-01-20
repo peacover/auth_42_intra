@@ -18,9 +18,17 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+<<<<<<< HEAD
     "jsx": "react-jsx"
+=======
+    "jsx": "preserve"
+>>>>>>> auth_master
   },
   "include": [
     "src"
   ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> auth_master

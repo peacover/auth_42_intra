@@ -49,4 +49,7 @@ export class UserDto{
     @IsOptional()
     friends: User[];
 
+    @IsOptional()
+    blocked: User[];
+
 }

@@ -65,27 +65,27 @@ export class AuthService {
         }
     }
 
-    async generate_2fa_secret(user: UserDto, @Res() res)
+    async generate_2fa_secret(user_req: UserDto, @Res() res)
     {
-        if (await this.prisma.user.findUnique({
-            where:{
-                id : user.id,
-            }
-        })){
-            this.enable_2fa(user, res);
-            const secret = authenticator.generateSecret();            
-            const otpauthUrl : string = authenticator.keyuri(user.email, this.config.get('TWO_FACTOR_AUTHENTICATION_APP_NAME'), secret);
-            this.save_secret_db(user, secret);
-            return ({
-                secret,
-                otpauthUrl
-            })
+        try{
+            const user = await this.get_user(user_req.id);
+            console.log(user);
+                this.enable_2fa(user, res);
+                const secret = authenticator.generateSecret();            
+                const otpauthUrl : string = authenticator.keyuri(user.email, this.config.get('TWO_FACTOR_AUTHENTICATION_APP_NAME'), secret);
+                this.save_secret_db(user, secret);
+                return ({
+                    secret,
+                    otpauthUrl
+                })
+
         }
-        else{
+        
+        catch{
             throw new HttpException("User not found!", 400);
         }
     }
-    async save_secret_db(user: UserDto, secret : string) {
+    async save_secret_db(user, secret : string) {
         const updated_user = await this.prisma.user.update({
             where: {id: user.id },
             data: {
@@ -97,8 +97,9 @@ export class AuthService {
         return toFileStream(res, otpauthUrl);
     }
 
-    async enable_2fa(user: UserDto, @Res() res){
+    async enable_2fa(user, @Res() res){
         try{
+            console.log(user.is_two_fa_enable);
             if (user.is_two_fa_enable === true)
                 res.json({message :"2fa is already enabled!"});
             else{
@@ -114,8 +115,11 @@ export class AuthService {
             throw new HttpException("Failed to enable 2fa!", 400);
         }
     }
-    async disable_2fa(user: UserDto, @Res() res){
+    async disable_2fa(user_req: UserDto, @Res() res){
         try{
+            const user = await this.get_user(user_req.id);
+            // console.log(user, user.is_two_fa_enable);
+            
             if (user.is_two_fa_enable === false)
                 res.json({message :"2fa is already disabled!"});
             else{

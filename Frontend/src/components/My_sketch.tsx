@@ -33,7 +33,10 @@ const SketchPong = () => {
 
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> auth_master
   let ok = 0;
   let hh = 0;
   let yarb = 0;
@@ -53,7 +56,11 @@ const SketchPong = () => {
 
   function buttonPressed(nbr: number) {
     button_cpt = 1;
+<<<<<<< HEAD
     console.log("nbr " + nbr);
+=======
+    //console.log("nbr " + nbr);
+>>>>>>> auth_master
     if (socket.current != null)
       socket.current.emit("spectJoin", { value: nbr });
     setState("started watching");
@@ -62,15 +69,29 @@ const SketchPong = () => {
     //
   }
 
+<<<<<<< HEAD
   useEffect(() => {
     socket.current = io("http://localhost:5555").on("connect", () => {
+=======
+
+  useEffect(() => {
+
+
+    socket.current = io("http://localhost:4000", {
+      withCredentials: true,
+    }).on("connect", () => {
+>>>>>>> auth_master
 
     if (socket.current != null)
     {
         socket.current.on('gameCount', (data) => {
         hh = data;
         setLayhfdk(+ data);
+<<<<<<< HEAD
         console.log("wch a 3chiri " + layhfdk);
+=======
+        //console.log("wch a 3chiri " + layhfdk);
+>>>>>>> auth_master
       });      
     }
     if (state == "play" && layhfdk === 0)
@@ -83,7 +104,11 @@ const SketchPong = () => {
           socket.current.on('gameCount', (data) => {
             hh = data;
             setLayhfdk(+ data);
+<<<<<<< HEAD
             console.log("wch a 3chiri " + layhfdk);
+=======
+            //console.log("wch a 3chiri " + layhfdk);
+>>>>>>> auth_master
           });
       }
 
@@ -103,9 +128,68 @@ const SketchPong = () => {
   }, [state, layhfdk]);
 
 
+<<<<<<< HEAD
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
     
+=======
+  const setup_2 = (p5: p5Types,canvasParentRef: Element) => {
+    p5.createCanvas(window.innerWidth/4 , (window.innerWidth / 8)).parent(canvasParentRef)
+
+    p5.background(70);
+
+  }
+
+  function draw_2(p5: p5Types)
+  {
+    p5.resizeCanvas(window.innerWidth/2 , (window.innerWidth / 8))
+
+    p5.background(70);
+    function getWindowSize() {
+      const { innerWidth, innerHeight } = window;
+      return { innerWidth, innerHeight };
+    }
+    const player_names = (p5: p5Types) => {
+      // this method will allow us to draw the score line of both players
+      // we start of by filling the whole screen black 
+      // we allign the text in the center and we can rectrieve the score of each players using the gamestate that is constantly
+      //retrieving data from the backend of our code and then we display it
+      // how to create as many buttons as i want based on a number 
+
+      p5.fill(0);
+      p5.textSize((getWindowSize().innerHeight * 20) / getWindowSize().innerHeight);
+      p5.textAlign(p5.CENTER);
+      //p5.resizeCanvas(getWindowSize().innerWidth, getWindowSize().innerHeight);
+      //console.log(relativeHeight);
+      if (gameState.current != null) {
+        p5.text(
+          gameState.current.players_names[0],
+          (getWindowSize().innerWidth / 46) * 7,
+          getWindowSize().innerWidth / 32
+        );
+
+        // p5.loadImage(gameState.current.players_avatar[0]);
+        // p5.loadImage(gameState.current.players_avatar[1]);
+
+        p5.text(
+          gameState.current.players_names[1],
+          (getWindowSize().innerWidth / 24) * 9,
+          getWindowSize().innerWidth / 32
+        );
+
+
+
+      }
+
+    };
+    player_names(p5);
+
+  }
+
+  const setup = (p5: p5Types,canvasParentRef: Element) => {
+    p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
+
+>>>>>>> auth_master
     p5.background(122);
 
   }
@@ -130,12 +214,21 @@ const SketchPong = () => {
       relativeHeight = (relativeWidth / aspectRatio);
 
       scalingRatio = relativeWidth / absoluteWidth;
+<<<<<<< HEAD
       console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
+=======
+      //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
+>>>>>>> auth_master
     }
 
     p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
     p5.background(122);
 
+<<<<<<< HEAD
+=======
+    
+
+>>>>>>> auth_master
     if (gameState.current != null) 
     {
 
@@ -178,6 +271,11 @@ const SketchPong = () => {
 
       };
 
+<<<<<<< HEAD
+=======
+      
+
+>>>>>>> auth_master
       const drawScore = (p5: p5Types) => {
         // this method will allow us to draw the score line of both players
         // we start of by filling the whole screen black 
@@ -219,9 +317,18 @@ const SketchPong = () => {
       //console.log("Asbhan lah " + gameState.current.state);
       // p5.resizeCanvas(getWindowSize().innerWidth   , relativeHeight);
       // p5.background(122);
+<<<<<<< HEAD
       drawClickToStartText(p5);
       drawScore(p5);
       console.log("Heres my aspect ratio " + aspectRatio);
+=======
+      //console.log("Plyaer name is "+gameState.current.players_names[0]);
+      drawClickToStartText(p5);
+      drawScore(p5);
+      
+     //player_names(p5);
+      //console.log("Heres my aspect ratio " + aspectRatio);
+>>>>>>> auth_master
       //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
       p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
 
@@ -318,7 +425,16 @@ const SketchPong = () => {
             ))} */}
             <Spectator/>
           </div>
+<<<<<<< HEAD
           : <div className="canvas-container"><Sketch setup={setup} draw={draw}  /></div>)
+=======
+          : <div className="canvas-container">
+            <div className="component1">
+              <Sketch setup={setup_2} draw={draw_2}  />
+            </div>
+            <Sketch setup={setup} draw={draw}  />
+            </div>)
+>>>>>>> auth_master
 
 
 
