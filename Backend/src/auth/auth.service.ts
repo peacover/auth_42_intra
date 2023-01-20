@@ -57,7 +57,8 @@ export class AuthService {
                   });
                 res.cookie('access_token', access_token, { httpOnly: true }).status(200);
                 // res.send(access_token);
-                res.json({message :"success!"});
+                // res.json({message :"success!"});
+                req.res.redirect(this.config.get('LOCAL_URL'))
             }
         }
         catch{

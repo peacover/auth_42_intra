@@ -42,7 +42,7 @@
               389.47
             ],
             "rotation": 0,
-            "text": "id\nfull_name\nusername\navatar\nfirst_time\nis_two_fa_enable\ntwo_fa_code?\nemail\nstatus(on, off, in-game, in-queue)\nwin\nlose\nwin\nfriends?\nachievements",
+            "text": "id\nfull_name\nusername\navatar\nfirst_time\nis_two_fa_enable\ntwo_fa_code?\nemail\nstatus(on, off, in-game, in-queue)\nwin\nlose\nfriends?\nachievements",
             "style": {
               "color": "black",
               "size": "small",
@@ -613,7 +613,7 @@
               619.04
             ],
             "rotation": 0,
-            "text": "id\nid_user1\nid_user2\nmode(1,2,3)\nscore_user1\nscore_user2\ntime\nstatus(playing,finished)",
+            "text": "id\nid_user1\nid_user2\nmode(1,2,3)\nscore_user1\nscore_user2\ntime\nstatus(playing,finished,\npaused)",
             "style": {
               "color": "black",
               "size": "small",

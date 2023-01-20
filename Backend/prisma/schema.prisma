@@ -39,27 +39,27 @@ model User {
   friendsRelation User[] @relation("friends")
 }
 
-model Chat{
+model Room{
   id Int @id @default(autoincrement())
-  name String?
-  type TypeChat
+  name String
+  type ACCESS
   password String?
 
-  users ChatUser[]
+  users RoomUser[]
   messages MessageUser[]
 }
 
-model ChatUser{
-  chat_id Int
-  chat Chat @relation(fields: [chat_id], references: [id])
+model RoomUser{
+  Room_id Int
+  chat Room @relation(fields: [Room_id], references: [id])
   user_id String
   user User @relation(fields: [user_id], references: [id])
   role Role
-  is_muted Boolean
-  mute_time MuteTime?
+
+  mute_time DateTime
   is_banned Boolean
 
-  @@id([chat_id, user_id])
+  @@id([Room_id, user_id])
 }
 
 model MessageUser{
@@ -92,10 +92,11 @@ enum Role{
   MEMBER
 }
 
-enum TypeChat{
+enum ACCESS{
   PUBLIC
   PRIVATE
   PROTECTED
+  DM
 }
 
 enum UserStatus{

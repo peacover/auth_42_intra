@@ -31,6 +31,12 @@ export class UserController {
     get_user(@Req() req, @Res() res){     
         return this.userService.get_user_all(req.user_obj, res);
     }
+
+    @UseGuards(JwtGuard)
+    @Get('me')
+    get_me(@Req() req, @Res() res){     
+        return this.userService.get_me(req.user_obj, res);
+    }
     
     @UseGuards(JwtGuard)
     @Get('user_score')
