@@ -51,15 +51,23 @@ export class AuthService {
                 req.res.redirect(this.config.get('LOCAL_URL'));
             }
             else if (nb_user === 1){
-                  const secret = this.config.get('JWT_SECRET');
-                  const access_token = await this.jwt.sign(payload, {
-                      expiresIn : '1d',
-                      secret : secret,
-                  });
+                const user = await this.prisma.user.findUnique({
+                    where:{
+                        id : req.user.id,
+                    }
+                });
+                const secret = this.config.get('JWT_SECRET');
+                const access_token = await this.jwt.sign(payload, {
+                    expiresIn : '1d',
+                    secret : secret,
+                });
                 res.cookie('access_token', access_token, { httpOnly: true }).status(200);
                 // res.send(access_token);
                 // res.json({message :"success!"});
-                req.res.redirect(this.config.get('LOCAL_URL'));
+                if (user.is_two_fa_enable === true)
+                    req.res.redirect(this.config.get('LOCAL_URL') + "verify_2fa");
+                else
+                    req.res.redirect(this.config.get('LOCAL_URL'));
             }
         }
         catch{
