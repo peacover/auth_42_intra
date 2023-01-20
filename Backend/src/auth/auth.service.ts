@@ -47,7 +47,8 @@ export class AuthService {
                     secret : secret,
                 });
                 res.cookie('access_token', access_token, { httpOnly: true }).status(200);
-                res.json({message :"success!"});
+                // res.json({message :"success!"});
+                req.res.redirect(this.config.get('LOCAL_URL'));
             }
             else if (nb_user === 1){
                   const secret = this.config.get('JWT_SECRET');
@@ -58,7 +59,7 @@ export class AuthService {
                 res.cookie('access_token', access_token, { httpOnly: true }).status(200);
                 // res.send(access_token);
                 // res.json({message :"success!"});
-                req.res.redirect(this.config.get('LOCAL_URL'))
+                req.res.redirect(this.config.get('LOCAL_URL'));
             }
         }
         catch{
