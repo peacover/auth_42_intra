@@ -1,12 +1,15 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import imaage from "./42.png"
 import "./login.css"
 
 const Login = () => {
     const [logged, setLogged] = useState(false);
-	const handlelogin = () =>{
-
-		window.location.replace("http://localhost:5000/auth/login");
+	const navigate = useNavigate();
+ 
+    const handlelogin = () =>{
+        window.location.replace("http://localhost:5000/auth/login");
         setLogged(true);
         if(logged)
             console.log("ALEADY LOGGED IN ");

@@ -17,8 +17,11 @@ const DisplayName = (props : any) => {
           props.setUser(newUsername);
           //SetNewUsername(newUsername);
           // console.log(props);
+         }).catch((err) =>
+         {
+          window.alert("Error While Updating Your Name ");
          });
-        console.log("okkkk");
+        
     }
     const HandleFile = (event: any | null) =>{
       const file = event.target.files[0];
@@ -32,6 +35,8 @@ const DisplayName = (props : any) => {
         }).then((response)=>{
 
           props.setAvatar(formData);
+        }).catch((err) =>{
+          window.alert("Error While Uploading Your File");
         });
     }
   

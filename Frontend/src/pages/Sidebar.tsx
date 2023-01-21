@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../Assets/logo.png";
 import sideBarImg from "../Assets/Rectangle 363.png";
 import { RxDashboard } from "react-icons/rx";
@@ -7,9 +7,19 @@ import { HiUserCircle, HiChatAlt2 } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { BiHeart } from 'react-icons/bi'
+import axios from "axios";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [off, setoff] = useState(false);
+  const handle_logout = () =>{
+    setoff(true);
+    let res = axios.post('http://localhost:5000/user/logout', off,  {withCredentials: true})
+    .then(response => {
+      window.alert("You have logged out !see You later")
+      navigate("/login");
+    })
+  }
 
   return (
     <div className="flex flex-col items-center  whitespace-nowrap">
@@ -75,7 +85,7 @@ const Sidebar = () => {
 
       {/* ------- logout button ------- */}
       <div className="mt-[63px]">
-        <button className="flex items-center text-[#EB5757] font-[500] gap-[1rem]">
+        <button className="flex items-center text-[#EB5757] font-[500] gap-[1rem]" onClick={handle_logout}>
           <RiLogoutCircleRLine /> LOGOUT
         </button>
       </div>
