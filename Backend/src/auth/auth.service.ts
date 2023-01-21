@@ -61,20 +61,26 @@ export class AuthService {
                     expiresIn : '1d',
                     secret : secret,
                 });
-                res.cookie('access_token', access_token, { httpOnly: true }).status(200);
-                // res.send(access_token);
-                // res.json({message :"success!"});
-                if (user.is_two_fa_enable === true)
-                    req.res.redirect(this.config.get('LOCAL_URL') + "verify_2fa");
-                else
-                    req.res.redirect(this.config.get('LOCAL_URL'));
+                if (user.is_two_fa_enable) {
+                    req.res.redirect(this.config.get('LOCAL_URL') + "verify_2fa/" + user.id);
+                }
+                else {
+                    res.cookie('access_token', access_token, { httpOnly: true }).status(200);
+                    // res.send(access_token);
+                    // res.json({message :"success!"});
+                    await this.prisma.user.update({
+                        where: {id: user.id },
+                        data: {
+                            status: UserStatus.ON,
+                        }
+                    });
+                    // if (user.is_two_fa_enable === true)
+                    //     req.res.redirect(this.config.get('LOCAL_URL') + "verify_2fa");
+                    // else
+                        req.res.redirect(this.config.get('LOCAL_URL'));
+
+                }
                 
-                await this.prisma.user.update({
-                    where: {id: user.id },
-                    data: {
-                        status: UserStatus.ON,
-                    }
-                });
             }
         }
         catch{
@@ -136,8 +142,6 @@ export class AuthService {
     async disable_2fa(user_req: UserDto, @Res() res){
         try{
             const user = await this.get_user(user_req.id);
-            // console.log(user, user.is_two_fa_enable);
-            
             if (user.is_two_fa_enable === false)
             {
                 throw new HttpException("2FA Already Disabled!", 400);
@@ -157,9 +161,10 @@ export class AuthService {
             throw new HttpException("Failed to disable 2fa!", 400);
         }
     }
-    async verify_2fa(@Req() req, @Res() res, @Param() param){
+    async verify_2fa(@Param() param, @Res() res){
         
-        const user = await this.get_user(req.user_obj.id);
+        const user = await this.get_user(param.userId);
+        
         if (user.is_two_fa_enable === false){
             throw new HttpException("2fa is not enable!", 400);
         }
@@ -167,8 +172,19 @@ export class AuthService {
             token: param.two_fa_code,
             secret: user.two_fa_code,
         });
-        if (!is_2fa_code_valid)
+        if (!is_2fa_code_valid) {
             throw new HttpException("Invalid 2fa code!", 400);
+        }
+
+        const payload = {
+            id: user.id,
+        };
+        const secret = this.config.get('JWT_SECRET');
+        const access_token = await this.jwt.sign(payload, {
+            expiresIn : '1d',
+            secret : secret,
+        });
+        res.cookie('access_token', access_token, { httpOnly: true });
         res.json({message :"2fa code is valid!"});
     }
     async get_user(req_id: string){

@@ -6,7 +6,7 @@ import Leaderboard from "../components/Home/Leaderboard";
 import MyGames from "../components/Home/MyGames";
 import Achievments from "../components/Home/Achievments";
 import Searchbar from "../components/Searchbar";
-import bookdata from "./bookdata.json"
+
 const Home = () => {
   return (
     <div>

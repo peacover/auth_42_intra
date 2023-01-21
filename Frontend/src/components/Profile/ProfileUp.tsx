@@ -63,7 +63,7 @@ const ProfileUp = () => {
 
       navigate("/profile/" + shkon);
     }).catch((err) => {
-      window.alert(err);
+      window.alert("You cant Unblock Someone Who Blocked You ");
     })
   }
   //window.alert("WASH ANAaa " + me);

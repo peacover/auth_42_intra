@@ -29,10 +29,10 @@ export class AuthController {
     }
     // @Get('logout')
 
-    @UseGuards(JwtGuard)
-    @Post("login/2fa/:two_fa_code")
-    verify_2fa(@Req() req, @Res() res, @Param() param) {
-        return this.authService.verify_2fa(req, res, param);
+    // @UseGuards(JwtGuard)
+    @Post("login/2fa/:two_fa_code/:userId")
+    verify_2fa(@Param() param, @Res() res) {
+        return this.authService.verify_2fa(param,res);
     }
 
 }

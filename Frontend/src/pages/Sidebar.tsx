@@ -6,20 +6,32 @@ import { TbFileSettings } from "react-icons/tb";
 import { HiUserCircle, HiChatAlt2 } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { RiLogoutCircleRLine } from "react-icons/ri";
-import { BiHeart } from 'react-icons/bi'
+import { BiHeart } from "react-icons/bi";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { logout } from "../reducers/UserSlice";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [off, setoff] = useState(false);
-  const handle_logout = () =>{
+
+  const dispatch = useDispatch();
+
+  const handle_logout = () => {
     setoff(true);
-    let res = axios.post('http://localhost:5000/user/logout', off,  {withCredentials: true})
-    .then(response => {
-      window.alert("You have logged out !see You later")
-      navigate("/login");
-    })
-  }
+    let res = axios
+      .post(
+        "http://localhost:5000/user/logout",
+        { off },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        window.alert("You have logged out !see You later");
+        navigate("/login");
+        dispatch(logout());
+
+      });
+  };
 
   return (
     <div className="flex flex-col items-center  whitespace-nowrap">
@@ -48,19 +60,23 @@ const Sidebar = () => {
             </span>
             <span className="text-[18px]">Settings</span>
           </li>
-          <li onClick={() => navigate("/chat")}
-          className="flex items-center gap-[14px] cursor-pointer">
+          <li
+            onClick={() => navigate("/chat")}
+            className="flex items-center gap-[14px] cursor-pointer"
+          >
             <span className="text-[24px]">
               <HiChatAlt2 />
             </span>
             <span className="text-[18px]">Chat</span>
           </li>
-          <li onClick={() => navigate("/addfriend")} 
-          className="flex items-center gap-[14px] cursor-pointer">
+          <li
+            onClick={() => navigate("/friends")}
+            className="flex items-center gap-[14px] cursor-pointer"
+          >
             <span className="text-[24px]">
               <BiHeart />
             </span>
-            <span className="text-[18px]">Add friends</span>
+            <span className="text-[18px]">friends</span>
           </li>
           <li
             onClick={() => navigate("/profile")}
@@ -85,7 +101,10 @@ const Sidebar = () => {
 
       {/* ------- logout button ------- */}
       <div className="mt-[63px]">
-        <button className="flex items-center text-[#EB5757] font-[500] gap-[1rem]" onClick={handle_logout}>
+        <button
+          className="flex items-center text-[#EB5757] font-[500] gap-[1rem]"
+          onClick={handle_logout}
+        >
           <RiLogoutCircleRLine /> LOGOUT
         </button>
       </div>
