@@ -45,7 +45,7 @@ export class UserController {
     }
     
     @UseGuards(JwtGuard)
-    @Get('logout')
+    @Post('logout')
     logout(@Req() req, @Res({ passthrough: true }) res){
         this.userService.edit_user_status(req.user_obj, UserStatus.OFF);
         res.clearCookie('access_token');
