@@ -113,18 +113,20 @@ export class AuthService {
         return toFileStream(res, otpauthUrl);
     }
 
-    async enable_2fa(user, @Res() res){
+    async enable_2fa(user_req, @Res() res){
         try{
-            console.log(user.is_two_fa_enable);
+            const user = await this.get_user(user_req.id);
             if (user.is_two_fa_enable === true)
-                res.json({message :"2fa is already enabled!"});
+            {
+                throw new HttpException("2FA Already Enabled!", 400);
+            }                
             else{
-                const updated_user = await this.prisma.user.update({
-                    where: {id: user.id },
-                    data: {
-                        is_two_fa_enable: true,
-                    }
-                  });
+            const updated_user = await this.prisma.user.update({
+                where: {id: user.id },
+                data: {
+                    is_two_fa_enable: true,
+                }
+             });
             }
         }
         catch{
@@ -137,7 +139,10 @@ export class AuthService {
             // console.log(user, user.is_two_fa_enable);
             
             if (user.is_two_fa_enable === false)
-                res.json({message :"2fa is already disabled!"});
+            {
+                throw new HttpException("2FA Already Disabled!", 400);
+             //   res.json({message :"2fa is already disabled!"});
+            }
             else{
                 const updated_user = await this.prisma.user.update({
                     where: {id: user.id },
