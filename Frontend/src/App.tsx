@@ -10,6 +10,7 @@ import Spectator from "./components/spectator_mod";
 import Login from "./pages/login";
 import Nofriendpage from "./pages/errornotfound";
 
+import Verify_2fa from "./pages/verify_2fa"
 import './index'
 import axios from "axios";
 
@@ -35,9 +36,11 @@ console.log("ayoub zab : " + state.is_two_fa_enable);
         <Route path='/game' element={<SketchPong/>} />
         <Route path='/watch/*' element={<Spectator />} />
         <Route path='/login' element={<Login/>} />
-        <Route path ='/errornotfound' element={<Nofriendpage/>}/>
-              
+        <Route path ='/verify_2fa' element={<Verify_2fa/>} />
+
        </Route>
+       <Route path ='/errornotfound' element={<Nofriendpage/>}/>
+
       </Routes>
     </>
   );  
