@@ -15,7 +15,6 @@ export class UserController {
     @UseGuards(JwtGuard)
     @Get('/')
     signin(@Req() req){
-        this.userService.edit_user_status(req.user_obj, UserStatus.ON);
         return req.user_obj;
     }
 

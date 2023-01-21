@@ -68,6 +68,13 @@ export class AuthService {
                     req.res.redirect(this.config.get('LOCAL_URL') + "verify_2fa");
                 else
                     req.res.redirect(this.config.get('LOCAL_URL'));
+                
+                await this.prisma.user.update({
+                    where: {id: user.id },
+                    data: {
+                        status: UserStatus.ON,
+                    }
+                });
             }
         }
         catch{

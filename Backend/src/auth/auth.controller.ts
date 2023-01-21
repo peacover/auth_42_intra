@@ -3,6 +3,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { FortyTwoGuard, JwtGuard } from "src/auth/guard";
 import { AuthService } from "./auth.service";
 import { ApiTags } from '@nestjs/swagger';
+import { UserStatus } from "@prisma/client";
 
 @ApiTags('auth')
 @Controller('auth')
