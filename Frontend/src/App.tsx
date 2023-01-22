@@ -15,6 +15,7 @@ import "./index";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser, IUserState, login } from "./reducers/UserSlice";
+import { ChatPage } from "./pages/ChatPage";
 
 function App() {
   const [state, setState] = useState<any>({});
@@ -56,6 +57,7 @@ function App() {
               path="/settings"
               element={<Settings state={state.is_two_fa_enable} />}
             />
+             <Route path="/chat" element={<ChatPage/>} />
             <Route path="/friends" element={<Addfriend />} />
             <Route path="/game" element={<SketchPong />} />
             <Route path="/watch/*" element={<Spectator />} />
