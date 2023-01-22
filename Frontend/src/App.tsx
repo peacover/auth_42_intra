@@ -74,9 +74,10 @@ function App() {
   );
 }
 
+
 export default App;
 
-function RequireAuth({ children }: { children?: JSX.Element }) {
+function RequireAuth() {
   const userData: IUserState = useSelector((state: any) => state.user);
   let location = useLocation();
 
@@ -86,14 +87,10 @@ function RequireAuth({ children }: { children?: JSX.Element }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (children) {
-    return children;
-  }
-
   return <Outlet />;
 }
 
-function NotRequireAuth({ children }: { children?: JSX.Element }) {
+function NotRequireAuth() {
   const userData: IUserState = useSelector((state: any) => state.user);
   let location = useLocation();
 
@@ -101,10 +98,6 @@ function NotRequireAuth({ children }: { children?: JSX.Element }) {
 
   if (userData.isLoggedIn) {
     return <Navigate to="/" state={{ from: location }} replace />;
-  }
-
-  if (children) {
-    return children;
   }
 
   return <Outlet />;
