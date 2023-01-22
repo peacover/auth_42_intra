@@ -103,7 +103,7 @@ export class UserController {
     get_friends(@Req() req, @Res() res){
         return this.userService.get_friends(req.user_obj, res);
     }
-    
+
     @UseGuards(JwtGuard)
     @Get('status_friend/:friend_name')
     status_friend(@Req() req, @Param() param, @Res() res){

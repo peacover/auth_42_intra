@@ -7,18 +7,16 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install Prisma CLI
-RUN npm install -g prisma
-
 # Install dependencies
 RUN npm install
-
 
 # Copy application source code
 COPY . .
 
+RUN npm install styled-components
+
 # Expose the port for the application to run on
-EXPOSE 5000
+EXPOSE 3000
 
 # Start the application
 CMD ["./script.sh"]

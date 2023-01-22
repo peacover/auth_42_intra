@@ -720,3 +720,16 @@ export class UserService {
 //     "s3:GetObject",
 //     "s3:DeleteObject"
 // ],
+
+
+// async function getUserGameHistory(userId) {
+//   const games = await this.prisma.game.findMany({
+//     where: {
+//       OR: [
+//         { user1: { id: userId } },
+//         { user2: { id: userId } }
+//       ]
+//     }
+//   });
+//   return games;
+// }
