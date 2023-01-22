@@ -34,7 +34,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="flex flex-col items-center  whitespace-nowrap">
+    <div className="flex flex-col items-center  whitespace-nowrap text-white">
       {/* -------- logo --------- */}
       <div>
         <img src={logo} alt="logo" />

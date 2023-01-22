@@ -175,7 +175,12 @@ export class AuthService {
         if (!is_2fa_code_valid) {
             throw new HttpException("Invalid 2fa code!", 400);
         }
-
+        await this.prisma.user.update({
+            where: {id: user.id },
+            data: {
+                status: UserStatus.ON,
+            }
+          });
         const payload = {
             id: user.id,
         };

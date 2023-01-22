@@ -82,7 +82,7 @@ const Settings = ({ state }: { state: boolean }) => {
     })
 
   return (
-    <div className="w-[1021px] min-h-screen text-white">
+    <div className="w-[1021px] min-h-screen">
       <h1 className="text-[77px] text-[#F2F2F2] text-center font-[700] tracking-wider">
         Settings
       </h1>

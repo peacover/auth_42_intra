@@ -7,7 +7,7 @@ const Dashboard = () => {
     <div className="flex">
       {/* ------- SIDEBAR ---------- */}
       <div className="min-w-[253px]">
-        <div className="sticky left-0 top-0 w-[253px] min-h-[1023px] px-[71px] pt-[38px] bg-black  text-white">
+        <div className="sticky left-0 top-0 w-[253px] min-h-[1023px] px-[71px] pt-[38px] bg-black ">
           <Sidebar />
         </div>
       </div>
