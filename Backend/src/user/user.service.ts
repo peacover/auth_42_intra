@@ -305,6 +305,16 @@ export class UserService {
             }
           });
     }
+    async delete_dm_room(user_id, friend_id){
+        const deletedRooms = await this.prisma.room.deleteMany({
+            where: {
+              type: ACCESS.DM,
+              users: {
+                every: { user: { id: { in: [user_id, friend_id] } } },
+              },
+            },
+          });                   
+    }
     async get_friends(user : UserDto, @Res() res){
         try{
             const friends = await this.prisma.user.findUnique({
@@ -508,6 +518,7 @@ export class UserService {
             if (blocked_friend_found == true){
                 throw new HttpException('Friend already blocked', HttpStatus.BAD_REQUEST);
             }
+            this.delete_dm_room(user_req.id, block_friend.id);
             const updated_user = await this.prisma.user.update({
                 where: {id: user_req.id },
                 include: {blocked : true},
