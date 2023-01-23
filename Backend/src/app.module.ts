@@ -2,8 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChatModule } from './chat/chat.module';
+import { AppGateway } from './app.gateway';
+import { UserService } from './user/user.service';
+import { GameModule } from './game/app.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -12,9 +16,12 @@ import { ChatModule } from './chat/chat.module';
     }),
     AuthModule,
     UsersModule,
+    GameModule,
     PrismaModule,
     ChatModule,
+    JwtModule,
   ],
+  providers: [AppGateway, UserService, ConfigService]
 })
 export class AppModule {}
 

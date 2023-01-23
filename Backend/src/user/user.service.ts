@@ -712,6 +712,30 @@ export class UserService {
       res.json({ message: 'success' });
     }
   }
+  async get_history(user_req, username : string, @Res() res) {
+    const user_nb = await this.prisma.user.count({
+      where: {
+        username: username,
+      },
+    });
+    if (user_nb == 0) {
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    } else {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          username: username,
+      }});
+      const games = await this.prisma.game.findMany({
+            where: {
+              OR: [
+                { user1: { id: user.id } },
+                { user2: { id: user.id } }
+              ]
+            }
+          });
+      res.json(games);
+    }
+  }
 }
 
 // "Action": [
