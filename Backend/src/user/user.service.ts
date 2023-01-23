@@ -39,13 +39,19 @@ export class UserService {
   }
   async get_user_all(user_obj: UserDto, @Res() res) {
     // console.log(user);
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: user_obj.id,
-      },
-    });
-    console.log('ayoub dima khdam : ' + user.username);
-    res.json(user);
+    try{
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: user_obj.id,
+        },
+      });
+      res.json(user);
+    }
+    catch{
+      throw new HttpException(
+        'Error while getting users',
+        HttpStatus.BAD_REQUEST,);
+    }
   }
 
   async get_me(user_obj: UserDto, @Res() res) {

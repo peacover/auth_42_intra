@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChatData, Currentsocket } from "../../../context/ChatUserContext";
 import { AccessPopUp } from "../PopUps/AccessPopUp";
 import { AddMemberPopUp } from "../PopUps/AddMemberPopUp";
@@ -32,6 +33,7 @@ export const ChatHeader = () => {
     const [leaveBtn, setLeaveBtn] = useState(false)
 
     const [isDM, setIsDM] = useState(false);
+    const navigate = useNavigate();
 
     const [addmemberPopUp, setAddMemberPopUp] = useState(false);
     const [rolePopUp, setRolePopUp] = useState(false)
@@ -48,18 +50,16 @@ export const ChatHeader = () => {
     let activate = false;
 
     Currentsocket.on('roomenter', async (payload: any) => {
-        if (activate == false)
-        {
-            console.log('haaaaaa lma39ooul ');
+        if (activate == false) {
             ChatData.activeRoomId = payload.room.id;
             ChatData.activeRoomName = payload.room.name;
-            ChatData.activeRoomType = payload.room.type; 
+            ChatData.activeRoomType = payload.room.type;
             ChatData.activeRoomRole = payload.room.role;
+            setProfile(payload.room.profile);
             showActions();
         }
-        else
-        {
-           activate = true; 
+        else {
+            activate = true;
         }
     })
 
@@ -111,24 +111,18 @@ export const ChatHeader = () => {
         setActivePopUp('');
     };
 
-    const showActions =   () => {
-        
+    const showActions = () => {
+
         setRoomName(ChatData.activeRoomName);
         switch (ChatData.activeRoomRole) {
-            case (ROLES.DM):
-                setLeaveBtn(false);
-                setAddMemberBtn(false);
-                setRestrictBtn(false);
-                setAccessBtn(false);
-                setRoleBtn(false);
-                setIsDM(true);
-                break;
             case ROLES.MEMBER:
                 setAccessBtn(false);
                 setRoleBtn(false);
                 setAddMemberBtn(false);
                 setRestrictBtn(false);
                 setLeaveBtn(true);
+                setIsDM(false);
+
                 break;
             case ROLES.ADMIN:
                 setAccessBtn(false);
@@ -136,6 +130,8 @@ export const ChatHeader = () => {
                 setLeaveBtn(true);
                 setAddMemberBtn(true);
                 setRestrictBtn(true);
+                setIsDM(false);
+
                 break;
             case (ROLES.OWNER):
                 setLeaveBtn(true);
@@ -143,10 +139,13 @@ export const ChatHeader = () => {
                 setRestrictBtn(true);
                 setAccessBtn(true);
                 setRoleBtn(true);
+                setIsDM(false);
                 break;
             default:
+                
                 break;
         }
+
         changeProfile();
     }
 
@@ -154,30 +153,44 @@ export const ChatHeader = () => {
         return new Promise(res => setTimeout(res, delay));
     }
 
-    
 
-    // useEffect(() => {
-    //     showActions();
-    //     // console.log('hellooooovhjasjdvkaksdbvkajbsdkvjbaskdjvbkajsdvbasdv');
-    //     //setActivity('online');
-    //     //console.log(activity);
-    // }, [])
+
+
     const changeProfile = () => {
 
         switch (ChatData.activeRoomType) {
+            case ('DM'):
+                setLeaveBtn(false);
+                setIsDM(true);
+                break;
             case "PROTECTED":
-                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=EB6144&color=fff&font-size=0.5')
+                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=EB6144&color=EB6144&font-size=0.5')
                 break;
             case "PRIVATE":
-                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=3E72EB&color=fff&font-size=0.5')
+                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=3E72EB&color=3E72EB&font-size=0.5')
                 break;
             case "PUBLIC":
-                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=A2EB26&color=fff&font-size=0.5')
+                setProfile('https://ui-avatars.com/api/?name=' + ChatData.activeRoomName + '&background=A2EB26&color=A2EB26&font-size=0.5')
                 break;
             default:
                 break;
         }
     }
+
+    Currentsocket.on('chatclear', () => {
+        setProfile('https://ui-avatars.com/api/?name=H&background=000&color=010');
+        setRoomName('');
+        setIsDM(false);
+
+        setAddMemberBtn(false);
+        setRoleBtn(false);
+        setRestrictBtn(false);
+        setAccessBtn(false);
+        setLeaveBtn(false);
+    })
+
+
+    // <div className={activity}></div>
 
     return (
         <>
@@ -185,7 +198,8 @@ export const ChatHeader = () => {
                 <div className="roominfo">
                     <img src={profile} alt="room profile" />
                     <span>{roomname}</span>
-                    {isDM && <div className={activity}></div>}
+                    {isDM && <img className="invitegame" src="invite.png" alt="" onClick={() => navigate("/profile/" + ChatData.activeRoomName)}/>}
+                    
                 </div>
                 <div className="roomactions">
                     {addmemberBtn && <img src="addmember.png" alt="add user" onClick={() => showpopup(POPUPS.ADDMEMBER)} />}

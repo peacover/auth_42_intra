@@ -140,15 +140,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   constructor(private readonly jwtService: JwtService, private readonly prismaService: PrismaService) { }
   private server: Server;
   private logger: Logger = new Logger("ChatGateway");
-
   private chatservice: ChatService;
-
 
   //TODO: an array of the connected sockets
   private userSocketMap: Array<userSocket> = Array<userSocket>();
 
 
-  roomcount: number = 0;
 
   afterInit(server: Server) {
     this.server = server;
@@ -157,189 +154,44 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleConnection(client: Socket) {
     try {
-      const user = await this.getUserFromSocket(client);
-      console.log(user.username + " has just connected!");
+     
+    } catch (error) {
 
-      // TODO: add client to connected_clients_map
-      this.userSocketMap.push(new userSocket(user.username, client));
-
-      let notif: notification = new notification();
-      var sentpayload = {
-        notification: {},
-        payload: null,
-      };
-
-
-      const roomusers = await this.getAllRoomsByUserId(user.id);
-      // const roomusers = await this.prismaService.roomUser.findMany({
-      //   where: {
-      //     user_id: user.id
-      //   },
-      //   include: {
-      //     chat: true
-      //   }
-      // })
-
-
-
-      let joinedrooms = roomusers.map((room) => {
-        room.chat['joined'] = true;
-        room.chat['lastmessage'] = ''
-        return (room.chat);
-      })
-
-      let allrooms = await this.getAllRooms(client);
-
-      for (let i = 0; i < allrooms.length; i++) {
-        let found = false;
-        for (let j = 0; j < joinedrooms.length; j++) {
-          if (allrooms[i].id == joinedrooms[j].id) {
-            found = true
-            break;
-          }
-        }
-        if (!found)
-          joinedrooms.push(allrooms[i]);
-      }
-
-      sentpayload.payload = {
-        rooms: joinedrooms,
-        otherrooms: [],
-        dms: [],
-        username: user.username,
-        id: user.id,
-        fullname: user.full_name,
-        profile: user.avatar,
-      };
-
-
-      await client.emit('connection', sentpayload);
-      //console.log('hhhahshhashashash' + JSON.stringify(array));
-
-
-
-
-      // let objArray: any[] = Array.from(roomusers, async roomuser => {
-      //   const room = await this.prismaService.room.findUnique({
-      //     where: {
-      //       id: roomuser.Room_id,
-      //     }
-      //   })
-      //   return {
-      //     roomname: room.name,
-      //     lastmessage: '',
-      //     access: room.type,
-      //     id: room.id
-      //   }
-      // });
-
-      // sentpayload.payload.rooms = here;
-
-      //   username: user.username,}
-      //console.log('sent payload is ' + here[0].roomname)
-
-
-
-      // TODO: notify the server to updated online users
-    }
-
-    catch {
-      console.log('couldnt connect')
     }
   }
 
 
   @SubscribeMessage('connectpls')
   async connect(client: Socket) {
+
+   
     try {
       const user = await this.getUserFromSocket(client);
-      console.log(user.username + " has just connected!");
 
-      // TODO: add client to connected_clients_map
+
+      let index = this.userSocketMap.findIndex(e => e.username == user.username);
+      if (index != -1) {
+        this.userSocketMap.splice(index, 1);
+      }
       this.userSocketMap.push(new userSocket(user.username, client));
 
-      let notif: notification = new notification();
-      var sentpayload = {
-        notification: {},
-        payload: null,
-      };
-
-
-      const roomusers = await this.getAllRoomsByUserId(user.id);
-      // const roomusers = await this.prismaService.roomUser.findMany({
-      //   where: {
-      //     user_id: user.id
-      //   },
-      //   include: {
-      //     chat: true
-      //   }
-      // })
-
-
-
-      let joinedrooms = roomusers.map((room) => {
-        room.chat['joined'] = true;
-        room.chat['lastmessage'] = ''
-        return (room.chat);
-      })
-
-      let allrooms = await this.getAllRooms(client);
-
-      for (let i = 0; i < allrooms.length; i++) {
-        let found = false;
-        for (let j = 0; j < joinedrooms.length; j++) {
-          if (allrooms[i].id == joinedrooms[j].id) {
-            found = true
-            break;
-          }
+      let sentpayload = {
+        payload: {
+          username: user.username,
+          id: user.id,
+          fullname: user.full_name,
+          profile: user.avatar,
         }
-        if (!found)
-          joinedrooms.push(allrooms[i]);
-      }
-
-      sentpayload.payload = {
-        rooms: joinedrooms,
-        otherrooms: [],
-        dms: [],
-        username: user.username,
-        id: user.id,
-        fullname: user.full_name,
-        profile: user.avatar,
       };
+      client.emit('connection', sentpayload);
+      this.updateAllSocketRooms(client);
 
 
-      await client.emit('connection', sentpayload);
-      //console.log('hhhahshhashashash' + JSON.stringify(array));
+      const blocked = await this.getBlockedUsers(user.id);
+      console.log(blocked);
+      client.emit('getblocked', blocked);
+    } catch (error) {
 
-
-
-
-      // let objArray: any[] = Array.from(roomusers, async roomuser => {
-      //   const room = await this.prismaService.room.findUnique({
-      //     where: {
-      //       id: roomuser.Room_id,
-      //     }
-      //   })
-      //   return {
-      //     roomname: room.name,
-      //     lastmessage: '',
-      //     access: room.type,
-      //     id: room.id
-      //   }
-      // });
-
-      // sentpayload.payload.rooms = here;
-
-      //   username: user.username,}
-      //console.log('sent payload is ' + here[0].roomname)
-
-
-
-      // TODO: notify the server to updated online users
-    }
-
-    catch {
-      console.log('couldnt connect')
     }
   }
 
@@ -356,18 +208,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     try {
       const user = await this.getUserFromSocket(client);
       const room = await this.getRoomByRoomId(payload.roomid);
-      // console.log("leave room", `
-      //         DELETE FROM RoomUser
-      //         WHERE Room_id = ${room.id}
-      //         AND user_id = ${user.id}`)
-      // const deleteroomuser = await this.prismaService.$queryRaw(Prisma.sql`
-      //       DELETE FROM RoomUser
-      //       WHERE Room_id = ${room.id}
-      //       AND user_id = ${user.id}`)
+    
 
-      // console.log("hello : " + await deleteroomuser);
-
-
+      client.leave(payload.roomid.toString());
       const deleteroomuser = await this.prismaService.roomUser.delete({
         where: {
           Room_id_user_id: {
@@ -377,7 +220,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         },
       })
 
+      let msg = user.username + ' has left the room!'
+      this.sendMessageToSocketRoom(payload.roomid, 'Server', msg, 'ServerAvatar.png');
+
       client.emit('requestroomsupdate');
+      client.emit('chatclear');
     } catch (error) {
 
     }
@@ -444,7 +291,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
 
-      console.log(payload.name + ' with id: ' + room.id + ' has been created succefully ');
       client.emit('roomcreate', sentpayload);
 
       this.server.emit('requestroomsupdate');
@@ -476,7 +322,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const room = await this.getRoomByRoomId(payload.id);
       const user = await this.getUserFromSocket(client);
       if (room.type == ACCESS.PROTECTED && room.password != payload.password) {
-        console.log('Wrong Password!!??');
         client.emit('roomjoinerror', { message: 'wrong password!' });
         return;
       }
@@ -501,10 +346,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         joined: true,
         password: '',
       }
-      this.enterroom(client, roominfo)
-
 
       client.emit('requestroomsupdate');
+
+      let msg = user.username + ' has joined the room!'
+      this.sendMessageToSocketRoom(payload.id, 'Server', msg, 'ServerAvatar.png');
+
+      this.enterroom(client, roominfo)
 
     } catch (error) {
       client.emit('roomjoinerror', { message: 'try again later!' });
@@ -531,47 +379,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
 
-
-
-  //   try{
-  //     if (!user.achievements.includes(achievement)){
-  //         const updated_user = await this.prisma.user.update({
-  //             where: {id: user.id },
-  //             data: {
-  //                 achievements: {
-  //                     push: achievement,
-  //                 }
-  //             }
-  //           });
-  //         return updated_user;
-  //     }
-  //     return user;
-  // }
-
-
-
   @SubscribeMessage('recievemessage')
   async messagerecieved(client: Socket, payload: any) {
 
 
     try {
       const user = await this.getUserFromSocket(client);
-      console.log(user.username + " : ", payload.message);
 
       const roomuser = await this.getRoomUser(payload.roomid, user.id);
 
-      if (roomuser.mute_time.getTime() > Date.now() )
-        return ;
+      if (roomuser.mute_time.getTime() > Date.now() || roomuser.is_banned)
+        return;
 
 
       let newmesg = { sender: user.username, messagecontent: payload.message, profile: user.avatar };
 
-      this.userSocketMap.forEach((usersocket) => {
-        //console.log(usersocket.currentroom);
-        if (usersocket.currentroom == payload.roomid)
-          usersocket.getsocket().emit('messagerecieve', newmesg);
+     
+      this.server.to(payload.roomid.toString()).emit('messagerecieve', newmesg);
 
-      })
+
 
       let room = await this.getRoomByRoomId(payload.roomid);
 
@@ -605,12 +431,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   // client has selected a room in frontend {MIGHT CHANGE TO BE INCLUDED IN JOINROOM}
   @SubscribeMessage('enterroom')
   async enterroom(client: Socket, payload: any) {
-
-    // TODO: check if user already joined the selected room
     const room = await this.getRoomByRoomId(payload.id);
-
     const user = await this.getUserFromSocket(client);
-    //console.log(room);
 
     const roomuser = await this.prismaService.roomUser.findMany({
       where: {
@@ -626,56 +448,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     })
 
     if (roomuser[0].is_banned) {
-      //emit error your arre banned from this channel
-      //client.emit('');
       return;
     }
 
 
+    if (room.type == ACCESS.DM)
+    {
+      const names =  room.name.split(' - ');
+      const otherusername = (names[0] == user.username) ? names[1] : names[0];
+      room.name = otherusername;
+      const otheruser = await this.getUserByUserName(otherusername);
+      room['profile'] = otheruser.avatar;
+    }
 
     const msgs = await this.getAllMessagesByRoomId(room.id, user.id);
-
-    //let messages = [];
-    //let messages;//: Array<Message> = Array<Message>();
-    // {id : 0, sender: 'fibo', messagecontent: 'wash al3shir hani', profile: 'hgrissen.jpeg'},
-    // {id : 1, sender: 'nizar', messagecontent: 'hmd o nta ?', profile: 'hgrissen.jpeg'},
-    // {id : 2, sender: 'fibo', messagecontent: 'bikhir ', profile: 'hgrissen.jpeg'},
-    // {id : 3, sender: 'nizar', messagecontent: 'dik chat maghadish issali wla kifash??', profile: 'hgrissen.jpeg'},
-    // {id : 4, sender: 'fibo', messagecontent: 'wa ghir sma7lia a dak zamel', profile: 'hgrissen.jpeg'},
-    // {id : 5, sender: 'nizar', messagecontent: 'shuf 3rfti ash ghadi dir', profile: 'hgrissen.jpeg'},
-    // {id : 6, sender: 'nizar', messagecontent: 'ana mab9itsh m3akum fhad lprojet', profile: 'hgrissen.jpeg'},
-
-    //  messages = msgs.map(async (msg) => {
-    //     const sender = await this.prismaService.user.findUnique({
-    //       where: {
-    //         id: msg.user_id
-    //       }
-    //     })
-
-
-    //     msg['id'] = msg.Message_id,
-    //     msg['sender'] = sender.username,
-    //     msg['messagecontent'] = msg.content,
-    //     msg['time'] = msg.time,
-    //     msg['profile'] = sender.avatar
-
-    //   })
-
-    // msgs.forEach(async (msg) => {
-    //   const sender = await this.prismaService.user.findUnique({
-    //     where: {
-    //       id: msg.user_id
-    //     }
-    //   })
-
-    //   await messages.push({
-    //     id: msg.Message_id,
-    //     sender: sender.username,
-    //     messagecontent: msg.content,
-    //     time: msg.time,
-    //     profile: sender.avatar
-    //   });
-    // })
 
 
     const sentpayload = {
@@ -685,32 +471,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     room['role'] = roomuser[0].role;
 
-
-    // console.log('    hi     ');
-
-    // console.log(sentpayload.messages);
-
-    // console.log('    ho     ');
-
-    let index = this.userSocketMap.findIndex(e => e.socket == client);
-    client.leave[this.userSocketMap[index].getroom()];
-    this.userSocketMap[index].setroom(room.id.toString());
-    client.join[this.userSocketMap[index].getroom()];
-
+    let index = this.userSocketMap.findIndex(e => e.getusername() == user.username);
+    client.leave(this.userSocketMap[index]?.getroom());
+    this.userSocketMap[index]?.setroom(room.id.toString());
+    client.join(room.id.toString());
 
 
     client.emit('roomenter', sentpayload);
-
-    // client.leave(payload.room_id);
-    // join room this room socket
-    // client.join(payload.room_id);
-
-
-    // TODO: retrieve all the selected room's messages from the database 
-    //const messages = await this.getAllMessagesByRoomId(payload.room_id);
-
-    // TODO: send the retrieved messages to joined client
-    // client.emit('roomenter', { messages: 'messages' });
   }
 
   // user has added another user to a room
@@ -731,10 +498,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const updatorroomuser = await this.getRoomUser(payload.roomid, updator.id);
 
       if ((updatorroomuser.role != ROLE.OWNER && updatorroomuser.role != ROLE.ADMIN) || updatorroomuser.chat.type == ACCESS.DM) {
-        notif.setStatus(NOTIF_STATUS.FAILED);
-        notif.setStatusContent('Permission Denied');
-        sentpayload.notification = notif.getNotification();
-        client.emit('invited', sentpayload);
+        // notif.setStatus(NOTIF_STATUS.FAILED);
+        // notif.setStatusContent('Permission Denied');
+        // sentpayload.notification = notif.getNotification();
+        // client.emit('invited', sentpayload);
         return;
       }
 
@@ -744,7 +511,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         addedroomuser = await this.getRoomUser(payload.roomid, inviteduser.id);
 
       if (addedroomuser || !inviteduser) {
-        console.log('already in room or user doesn\'t exist!');
         return;
       }
       else
@@ -766,6 +532,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
       });
 
+
+
+      let msg = updator.username + ' has invited ' + inviteduser.username + ' to the room!';
+      this.sendMessageToSocketRoom(updatorroomuser.Room_id, 'Server', msg, 'ServerAvatar.png');
+
+
+      
       const othersocket = this.getUserSocket(payload.username);
       othersocket.emit('requestroomsupdate');
 
@@ -820,7 +593,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     // TODO: check client has permission for the change (only owner)
     if (updator_role !== 'OWNER' || room_type === 'DM' || room_type == payload.access) {
-      console.log('ahahahahahah something wrong!!!');
       return;
     }
 
@@ -833,6 +605,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         password: payload.password
       }
     })
+
+    let msg = user.username + ' has changed room\'s Access type  to ' + room_type + '!';
+    this.sendMessageToSocketRoom(roomuser.Room_id, 'Server', msg, 'ServerAvatar.png');
 
 
     this.server.emit('requestroomsupdate', null);
@@ -921,12 +696,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('updaterole')
   async updateuserrole(client: any, payload: any) {
     // TODO: create empty notifationobject and empty sent object
-    let notif: notification = new notification();
-    var sentpayload = {
-      notification: {},
-      payload: null,
-    };
-
     try {
       const user = await this.getUserFromSocket(client);
       const updateduser = await this.prismaService.user.findFirst({
@@ -959,9 +728,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       // TODO: check if the clientUser has the required permission (owner or admin)
       if (updator_role !== Role.OWNER || payload.role === Role.OWNER || updated_role == Role.OWNER) {
-        notif.setStatus(NOTIF_STATUS.FAILED);
-        notif.setStatusContent('Permission Denied');
-        sentpayload.notification = notif.getNotification();
         //client.emit('role_update', sentpayload);
         return;
       }
@@ -978,6 +744,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           role: payload.role,
         }
       })
+
+      let msg = updateduser.username + ' is Now ' + update.role + ' !' ;
+      this.sendMessageToSocketRoom(updatorroomuser.Room_id, 'Server', msg, 'ServerAvatar.png');
 
       return;
     } catch (error) {
@@ -1015,7 +784,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       return;
     }
 
-
+    let msg = payload.username + ' has been '
     // TODO: check the type of the restriction
     if (payload.restriction === RESTRICTION.BAN) {
       const update = await this.prismaService.roomUser.update({
@@ -1029,27 +798,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           is_banned: true,
         }
       })
+      msg += 'BANNED'
     }
     else if (payload.restriction === RESTRICTION.MUTE) {
-      console.log(payload.duration + '   ' + payload.restriction);
-      //let currdate = new Date(Date.now());
       let newDate = new Date(Date.now() + payload.duration);
-
-      // if (payload.duration == MUTEDURATION.FIFTEENSEC) {
-      //     console.log('hello 1');
-      //     //currdate.setSeconds(currdate.getSeconds() + 15);
-      // }
-      // else if (payload.duration == MUTEDURATION.FIVEMIN){
-      //     console.log('hello 2');
-      //     //currdate.setMinutes(currdate.getMinutes() + 5);
-      //  }
-      //  if (payload.duration == MUTEDURATION.ONEHOUR){
-      //     console.log('hello 3');
-      //     //currdate.setHours(currdate.getHours() + 1);
-      //  }
-
-
-      console.log(payload.duration + ' || ' + payload.restriction);
+     
       const update = await this.prismaService.roomUser.update({
         where: {
           Room_id_user_id: {
@@ -1061,6 +814,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           mute_time: newDate
         }
       })
+      msg += 'MUTED'
     }
     else if (payload.restriction === RESTRICTION.KICK) {
       const update = await this.prismaService.roomUser.delete({
@@ -1071,15 +825,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
         },
       })
+      msg += 'KICKED'
     }
-    else {
-      // notif.setStatus(NOTIF_STATUS.FAILED);
-      // notif.setStatusContent('Invalid Restriction');
-      // sentpayload.notification = notif.getNotification();
-      // client.emit('restriction_update', sentpayload);
+    // let newmesg = { sender: 'Server', messagecontent: msg, profile: 'ServerAvatar.png' };
+    // this.server.to(payload.roomid.toString()).emit('messagerecieve', newmesg);
 
+
+    this.sendMessageToSocketRoom(payload.roomid, 'Server', msg, 'ServerAvatar.png');
+    //this.server.to(payload.roomid.toString()).emit('requestroomsupdate');
+
+    if (payload.restriction == RESTRICTION.KICK || payload.restriction == RESTRICTION.BAN) {
+      let index = this.userSocketMap.findIndex(e => e.getusername() == restricteduser.username);
+      this.userSocketMap[index]?.getsocket().leave(roomuser.Room_id.toString());
+      this.userSocketMap[index]?.getsocket().emit('chatclear');
+      this.userSocketMap[index]?.getsocket().emit('requestroomsupdate');
     }
-
     return;
 
 
@@ -1130,15 +890,31 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       };
 
 
-      const roomusers = await this.getAllRoomsByUserId(user.id);
+      const roomusers = await this.getAllRoomUsersByUserId(user.id);
+
+
+
+
+
+      let bannedroomusers = roomusers.filter((roomuser) => { roomuser.is_banned });
+      let bannedrooms = bannedroomusers.map((room) => { return room.chat });
 
 
 
       let joinedrooms = roomusers.map((room) => {
         room.chat['joined'] = true;
-        room.chat['lastmessage'] = ''
+        room.chat['lastmessage'] = '';
+        if (room.is_banned)
+          room.chat['banned'] = true;
+        else
+          room.chat['banned'] = false;
+        //if (!room.is_banned || room.chat.type != ACCESS.DM)
         return (room.chat);
       })
+
+      joinedrooms = joinedrooms.filter((room) => { return (room.type != ACCESS.DM) })
+
+      //joinedrooms = joinedrooms.filter((room) => {room['banned'] == false})
 
       let allrooms = await this.getAllRooms(client);
 
@@ -1154,8 +930,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           joinedrooms.push(allrooms[i]);
       }
 
+     
+
+      let rooms = await this.getAllDMs(client);
+
+      joinedrooms.forEach((room) => rooms.push(room))
+
       sentpayload.payload = {
-        rooms: joinedrooms,
+        rooms: rooms,
         otherrooms: [],
         dms: [],
       };
@@ -1174,12 +956,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const token = cookies.split(';').find((c) => c.trim().startsWith('access_token='));
       if (token) {
         const payload: any = this.jwtService.decode(token.split('=')[1]);
-        //console.table(payload);
         const user = await this.prismaService.user.findUnique({
           where: { id: payload.id },
 
         });
-        //console.log(user);
         return user;
       }
     }
@@ -1196,18 +976,62 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return this.userSocketMap[index].getsocket();
   }
 
+
+  async getAllDMs(client: Socket) {
+    const user = await this.getUserFromSocket(client);
+
+    const dms = await this.prismaService.roomUser.findMany({
+      where: {
+        AND: [
+          { user_id: user.id },
+          {
+            chat: {
+              type: ACCESS.DM
+            }
+          }
+        ]
+      },
+      include: { chat: true, }
+    })
+
+
+
+
+    let filterd = [];
+    dms.forEach((room) => {
+      filterd.push(room.chat)
+    })
+
+
+    for (let i =0; i < filterd.length; i++  )
+    {
+      const names = filterd[i].name.split(' - ');
+      const otherusername = user.username == names[0] ? names[1] : names[0];
+      filterd[i].name = otherusername;
+      filterd[i]['joined'] = true;
+      filterd[i]['lastmessage'] = '';
+      
+      
+      const otheruser = await this.getUserByUserName(otherusername);
+      filterd[i]['profile'] = otheruser.avatar;
+    }
+
+
+    return filterd
+  }
   async getAllRooms(socket: Socket) {
     const allrooms = await this.prismaService.room.findMany({
       where: {
-        NOT: {
-          type: ACCESS.PRIVATE
-        }
+        OR: [
+          { type: ACCESS.PROTECTED },
+          { type: ACCESS.PUBLIC }
+        ]
       },
     })
     return (allrooms);
   }
 
-  async getAllRoomsByUserId(user_id: string) {
+  async getAllRoomUsersByUserId(user_id: string) {
     // const roomusers = await this.prismaService.roomUser.findMany({
     //   where: {
     //     user_id: user_id
@@ -1221,12 +1045,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const roomusers = await this.prismaService.roomUser.findMany({
       where: {
         AND: [
-          {
-            user_id: user_id
-          },
-          {
-            is_banned: false
-          },
+          { user_id: user_id },
+          { is_banned: false },
         ],
       },
       include: {
@@ -1239,6 +1059,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     // roomusers[0].chat
     return (roomusers);
   }
+
+
 
   async getAllMessagesByRoomId(room_id: any, user_id: string) {
     const allMessages = await this.prismaService.messageUser.findMany({
@@ -1326,4 +1148,34 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
 
+  sendMessageToSocketRoom(roomid: number, sender: string, msg: string, profile: string) {
+    let newmesg = { sender: sender, messagecontent: msg, profile: profile };
+    this.server.to(roomid.toString()).emit('messagerecieve', newmesg);
+  }
+
+
+  async getBlockedUsers(userid: string)
+  {
+    const blocked = await this.prismaService.user.findUnique({
+      where:{
+        id: userid
+      },
+      select:{
+        blocked: true,
+        blockedRelation: true,
+      }
+    })
+
+
+    let blockedusernames = [];
+    for (let i = 0; i < blocked.blocked.length; i++) {
+      blockedusernames.push(blocked.blocked[i].username);
+    }
+
+    for (let i = 0; i < blocked.blockedRelation.length; i++) {
+      blockedusernames.push(blocked.blockedRelation[i].username);
+    }
+
+    return (blockedusernames);
+  }
 }
