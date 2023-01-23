@@ -386,7 +386,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
                 { user1: { id: user.id } },
                 { user2: { id: user.id } }
               ]
-            }
+            },
+            take: 5,
           });
 
           let my_user_hiss: Array<user_info_whistory> = Array<user_info_whistory>();;

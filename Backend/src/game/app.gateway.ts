@@ -1,4 +1,4 @@
-import { Logger, Req } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger, Req, Res } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import {Socket, Server} from "socket.io"
 import { JwtGuard } from 'src/auth/guard';
@@ -8,7 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserDto } from 'src/user/dto';
-import { ModeGame, StatusGame, UserStatus } from '@prisma/client';
+import { Achievement, ModeGame, StatusGame, UserStatus } from '@prisma/client';
 
 
 interface player_properties 
@@ -608,6 +608,73 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     //   this.logger.log(`User with the id  ${player_ref.id} wasn't involved in any game`);
   }
 
+  async update_user_achievements(user, achievement: Achievement) {
+    try {
+      if (!user.achievements.includes(achievement)) {
+        const updated_user = await this.prismaService.user.update({
+          where: { id: user.id },
+          data: {
+            achievements: {
+              push: achievement,
+            },
+          },
+        });
+        return updated_user;
+      }
+      return user;
+    } catch {
+      throw new HttpException(
+        'Error while updating achievements',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async user_achievements(user_id: string) {
+    try {
+      let user = await this.get_user(user_id);
+      const winrate = (user.win / (user.win + user.lose)) * 100;
+      if (user.win_streak >= 10) {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.TEN_WIN_STREAK,
+        );
+      } else if (user.win_streak >= 5) {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.FIVE_WIN_STREAK,
+        );
+      }
+      if (winrate >= 80) {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.LEGEND_WIRATE,
+        );
+      } else if (winrate >= 60) {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.GREAT_WIRATE,
+        );
+      } else if (winrate >= 50) {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.DECENT_WIRATE,
+        );
+      } else {
+        user = await this.update_user_achievements(
+          user,
+          Achievement.GREAT_LOSER,
+        );
+      }
+
+    } catch {
+      throw new HttpException(
+        'Error while updating achievements',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
 
   @SubscribeMessage('Game_Stopped')  
   async Game_stopped(player_ref: Socket)
@@ -634,6 +701,59 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
         for(let i=0;i < this.GameMode[q_mode].queues[user_id].players.length; i++)
           this.socket_with_queue_id.delete(this.GameMode[q_mode].queues[user_id].players[i]);
+
+          const user1 = await this.prismaService.user.findUnique({
+            where: {id: this.GameMode[q_mode].queues[user_id].users[0] }
+          });
+          const user2 = await this.prismaService.user.findUnique({
+            where: {id: this.GameMode[q_mode].queues[user_id].users[1] }
+          });
+
+          if (user1.id === user.id)
+          {
+            await this.prismaService.user.update({
+              where: {id: user2.id },
+              data: {
+                  win: user2.win + 1,
+                  win_streak: user2.win_streak + 1,
+                  status: "ON",
+              }
+            });
+
+            await this.prismaService.user.update({
+              where: {id: user1.id },
+              data: {
+                  lose: user1.lose + 1,
+                  win_streak: 0,
+                  status: "ON",
+              }
+            });
+          }
+          else 
+          {
+            await this.prismaService.user.update({
+              where: {id: user1.id },
+              data: {
+                  win: user1.win + 1,
+                  win_streak: user1.win_streak + 1,
+                  status: "ON",
+              }
+            });
+
+            await this.prismaService.user.update({
+              where: {id: user2.id },
+              data: {
+                  lose: user2.lose + 1,
+                  win_streak: 0,
+                  status: "ON",
+              }
+            });
+          }
+          this.get_user_score(user1.id);
+          this.get_user_score(user2.id);
+
+          this.user_achievements(user1.id);
+          this.user_achievements(user2.id);
 
         this.user_with_queue_id.delete(this.GameMode[q_mode].queues[user_id].users[0]);
         this.user_with_queue_id.delete(this.GameMode[q_mode].queues[user_id].users[1]);
@@ -733,6 +853,58 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   }
 
+  async get_user(req_id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: req_id,
+      },
+    });
+    return user;
+  }
+
+  async update_user_score(user, score: number) {
+    try {
+      const updated_user = await this.prismaService.user.update({
+        where: { id: user.id },
+        data: {
+          score: score,
+        },
+      });
+      return updated_user;
+    } catch {
+      throw new HttpException(
+        'Error while updating score',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async get_user_score(user_id: string) {
+    try {
+      const user = await this.get_user(user_id);
+      const win: number = user.win;
+      const lose: number = user.lose;
+      let score: number = 0;
+      const winrate = (win / (win + lose)) * 100;
+      if (winrate >= 80) {
+        score = win * 300 - lose * 100 + 1000;
+      } else if (winrate >= 60) {
+        score = win * 300 - lose * 100 + 500;
+      } else if (winrate >= 50) {
+        score = win * 300 - lose * 100 + 200;
+      } else {
+        score = win * 300 - lose * 100;
+      }
+      const updated_user = await this.update_user_score(user, score);
+      return(updated_user.score);
+    } catch {
+      throw new HttpException(
+        'Error while updating score',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   @SubscribeMessage('GameEnded')
   async GameEnded(socket: Socket, payload: any)
   {
@@ -746,8 +918,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         const gameox = await this.prismaService.game.findUnique({
           where: { id: this.user_with_game_id.get(this.GameMode[user_mode].queues[user_id].users[0])} 
         });
+        
         if (gameox.status !== StatusGame.FINISHED)
         {
+          
           const updatedGame = await this.prismaService.game.update({
             where: { id: this.user_with_game_id.get(this.GameMode[user_mode].queues[user_id].users[0])},
             data: { user1_score: this.GameMode[user_mode].queues[user_id].scores[0]
@@ -844,10 +1018,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
               });
             }
           }
+          // this.get_user_score(this.GameMode[user_mode].queues[user_id].users[0]);
+          // this.get_user_score(this.GameMode[user_mode].queues[user_id].users[1]);
 
           this.GameMode[user_mode].queues[user_id].scores[0] = 0;
           this.GameMode[user_mode].queues[user_id].scores[1] = 0;
         }
+        this.get_user_score(this.GameMode[user_mode].queues[user_id].users[0]);
+        this.get_user_score(this.GameMode[user_mode].queues[user_id].users[1]);
+
+        this.user_achievements(this.GameMode[user_mode].queues[user_id].users[0]);
+        this.user_achievements(this.GameMode[user_mode].queues[user_id].users[1]);
     }
   }
   async edit_user_status(user_id : string, status : UserStatus){
