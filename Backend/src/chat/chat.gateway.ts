@@ -132,7 +132,7 @@ interface Message {
 @WebSocketGateway(4000, {
   cors: {
     credentials: true,
-    origin: 'http://localhost:3000',
+    origin: process.env.LOCAL_URL,
   },
   namespace: 'chat'
 })

@@ -200,7 +200,7 @@ class props {
 @WebSocketGateway(3080, { 
     cors: {
       credentials: true,
-    origin: 'http://localhost:3000',
+    origin: process.env.LOCAL_URL,
     }
   })
 
@@ -218,6 +218,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     async afterInit(server: Server) {
         this.server = server;
         console.log("Habibi weeeecchhh");
+
+        console.log("Testing "+process.env.BACKEND_URL);
         
         let all_users = await this.prismaService.user.findMany({
         });

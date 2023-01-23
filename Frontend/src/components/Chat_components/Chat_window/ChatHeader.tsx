@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChatData, Currentsocket } from "../../../context/ChatUserContext";
+import { main_socket_context } from "../../../sockets";
 import { AccessPopUp } from "../PopUps/AccessPopUp";
 import { AddMemberPopUp } from "../PopUps/AddMemberPopUp";
 import { LeavePopUp } from "../PopUps/LeavePopUp";
@@ -31,6 +32,8 @@ export const ChatHeader = () => {
     const [restrictBtn, setRestrictBtn] = useState(false);
     const [accessBtn, setAccessBtn] = useState(false)
     const [leaveBtn, setLeaveBtn] = useState(false)
+
+    const main_socket = useContext(main_socket_context);
 
     const [isDM, setIsDM] = useState(false);
     const navigate = useNavigate();
@@ -198,7 +201,11 @@ export const ChatHeader = () => {
                 <div className="roominfo">
                     <img src={profile} alt="room profile" />
                     <span>{roomname}</span>
-                    {isDM && <img className="invitegame" src="invite.png" alt="" onClick={() => navigate("/profile/" + ChatData.activeRoomName)}/>}
+                    {isDM && <img className="invitegame" src="invite.png" alt="" onClick={() => {
+                        
+                        main_socket.emit("invite_game", {player1: ChatData.userName})
+                        navigate("/game/4");
+                        }}/>}
                     
                 </div>
                 <div className="roomactions">

@@ -503,7 +503,7 @@ class Game {
 @WebSocketGateway(4000, { 
   cors: {
     credentials: true,
-  origin: 'http://localhost:3000',
+  origin: process.env.LOCAL_URL,
   }
 })
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 

@@ -1,7 +1,6 @@
 import React, { createContext, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
-
 export interface INotification{
     status: string;
     statuscontent: string
@@ -56,8 +55,8 @@ export const ChatData: IChatData = {
     socket: {},
 };
 
-
-export let Currentsocket = io("http://localhost:4000/chat", {
+// const chat_url : any = SOCK_URL + "/chat";
+export let Currentsocket = io( "http://localhost:4000" + "/chat" , {
     withCredentials: true,
     })
     // .on('connection', (recvpayload: any) => {

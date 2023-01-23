@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Post, Req, Res, UseGuards} from "@nestjs/common";
+import { Controller, Get, Param, Post, Req, Res, UseFilters, UseGuards} from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { FortyTwoGuard, JwtGuard } from "src/auth/guard";
+import { FortyTwoGuard, HttpExceptionFilter, JwtGuard } from "src/auth/guard";
 import { AuthService } from "./auth.service";
 import { ApiTags } from '@nestjs/swagger';
 import { UserStatus } from "@prisma/client";
@@ -11,6 +11,7 @@ export class AuthController {
     constructor(private authService: AuthService){}
 
     @UseGuards(FortyTwoGuard)
+    @UseFilters(new HttpExceptionFilter())
     @Get('login')
     login(@Req() req, @Res() res) {
         return this.authService.login(req, res);
