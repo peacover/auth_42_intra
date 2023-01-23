@@ -11,18 +11,29 @@ import { Usercontext } from "../../context/Usercontext"
 import { IoMdPersonAdd } from 'react-icons/io'
 import { ImBlocked } from 'react-icons/im'
 import { CgUnblock } from 'react-icons/cg'
+import { main_socket_context } from "../../sockets";
 
 const ProfileUp = () => {
+  
   const [me, itsme] = useState(true);
+  const main_socket = useContext(main_socket_context);
   const navigate = useNavigate();
   const [Username, setUsername] = useState("");
   const [fullname, getFullname] = useState("");
+  const [isLogged, setisLogged] = useState("");
+  
   const [mee, itsmee] = useState("");
   const [check, Setcheck] = useState("");
   let shkon = window.location.pathname.split("/", 3)[2];
   let url: string;
 
   const location = useLocation();
+
+  function ButtonisPressed()
+  {
+    main_socket.emit("invite_game", {player1: User})
+    navigate("/game/4");
+  }
 
   if (shkon) {
     url = "http://localhost:5000/user/user/" + shkon;
@@ -111,6 +122,7 @@ const ProfileUp = () => {
         SetUser(response.data);
         setUsername(response.data.username);
         getFullname(response.data.full_name);
+        setisLogged(response.data.status);
 
       }).catch(error => {
         Swal.fire({
@@ -123,6 +135,19 @@ const ProfileUp = () => {
       });
     fetchMe();
   }, [location])
+
+
+  useEffect(() => {
+    axios.get(url, {withCredentials: true})
+    .then((response) =>{
+        console.log("nigga" + response.status)
+        SetUser(response.data);
+      }).catch(error => 
+        {  
+          console.log("nigga" + error.response.status)
+          navigate("/errornotfound");
+        });
+  },[])
 
   return (
     <div className="flex items-center justify-center gap-[120px]">
@@ -158,6 +183,15 @@ const ProfileUp = () => {
                 <div className="text-[#FF0000] font-[500] tracking-wider" onClick={handle_remove}>Remove Friend</div>
                 <ImBlocked />
               </button>
+            </div>
+            <div>
+              <>
+              { isLogged == "ON" ?
+                <button onClick={ButtonisPressed} type="button" className="transition duration-300 ease-in-out align-center w-full justify-center items-center"> 
+                    Invite To A Game
+                </button> : <></>
+              }
+              </>
             </div>
           </div>
         )
