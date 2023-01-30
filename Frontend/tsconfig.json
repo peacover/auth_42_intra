@@ -18,25 +18,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "jsx": "react-jsx"
-=======
     "jsx": "preserve"
->>>>>>> auth_master
-=======
-    "jsx": "preserve"
->>>>>>> auth_master
   },
   "include": [
     "src"
   ]
-<<<<<<< HEAD
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> auth_master
-=======
-}
->>>>>>> auth_master

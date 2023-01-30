@@ -22,7 +22,7 @@ interface Userproperties
   const getuserdata = async ()=>
   {
     var ret : Userproperties | "{}" = "{}"
-    await axios.get("http://localhost:5000/user/user", {withCredentials: true})
+    await axios.get("http://10.12.3.2:5000/user/user", {withCredentials: true})
     .then((res)=>{
         const data : Userproperties | null = res.data
         localStorage.setItem("user", JSON.stringify(data))

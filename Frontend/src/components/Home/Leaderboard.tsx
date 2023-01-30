@@ -17,13 +17,13 @@ const Leaderboard = () => {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:5000/user/leaderboard', {withCredentials: true})
+    axios.get('http://10.12.3.2:5000/user/leaderboard', {withCredentials: true})
     .then((response) =>{
       setLeaderboard(response.data)
     })
   },[])
   return (
-    <div className="w-[433px] h-[371px] bg-[#262626] px-[32px] py-[19px] rounded-[20px]">
+    <div className="w-[433px] h-[371px] bg-[#262626] px-[32px] py-[19px] rounded-[20px] overflow-y-scroll scrollbar-hide overflow-hidden">
       <h1 className="text-[24px] mb-[12px] font-[600] text-white tracking-wider">
         Leaderboard
       </h1>

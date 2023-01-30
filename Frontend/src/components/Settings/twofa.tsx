@@ -26,11 +26,11 @@ const twofa = ({closemodel,openmodel2 ,ssucces, settoggled}:props) => {
       }
     const handlecode = (event:any) =>{
       event.preventDefault();
-      console.log("valuuuuuue", value) 
+      // console.log("valuuuuuue", value) 
       openmodel2(true)
-	    axios.post("http://localhost:5000/auth/login/2fa/",{value},{withCredentials: true})
+	    axios.post("http://10.12.3.2:5000/auth/login/2fa/",{value},{withCredentials: true})
       .then((response) =>{
-        console.log(response.data)
+        // console.log(response.data)
         ssucces(true)
         closemodel(false)
         settoggled(true)

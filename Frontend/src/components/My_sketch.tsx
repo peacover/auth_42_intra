@@ -1,10 +1,7 @@
 import React from "react";
 import Sketch from "react-p5";
 import p5Types from "p5";
-<<<<<<< HEAD
-=======
 import axios from 'axios';
->>>>>>> auth_master
 
 import P5Wrapper from 'react-p5';
 import p5 from 'p5';
@@ -13,14 +10,15 @@ import { GameState } from "./Ball"
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { stat } from "fs";
 import  Spectator  from './spectator_mod';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import BackGround from '../pages/background.jpg'
+import Sidebar from './../pages/Sidebar'
+import avatar1 from "./../Assets/question.jpg";
+import Botona from "../pages/Botona";
 
-
-<<<<<<< HEAD
-=======
   
   // await axios.get( process.env.REACT_APP_BACKEND_URL+ "/chat/myChannels", 
   // {withCredentials: true} 
@@ -37,15 +35,23 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
   //}
 
 
->>>>>>> auth_master
+
 const SketchPong = () => {
 
   const socket = useRef(null as null | Socket);
   const gameState = useRef(null as null | GameState);
   const [state, setState] = useState("waiting");
   const [Cpt, setCpt] = useState(0);
+  const [user_one, setUserone] = useState("");
+  const [user_two, setUsertwo] = useState("");
 
+  const [user_one_score, setUserone_score] = useState(0);
+  const [user_two_score, setUsertwo_score] = useState(0);
 
+  const [user_one_name, setUserone_name] = useState("");
+  const [user_two_name, setUsertwo_name] = useState("");
+
+  const navigate = useNavigate();
   const [my_width, setWidth] = useState(window.innerWidth);
   const [m_height, setHeight] = useState(window.innerHeight);
 
@@ -56,13 +62,6 @@ const SketchPong = () => {
 
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> auth_master
-=======
->>>>>>> auth_master
   let ok = 0;
   let hh = 0;
   let yarb = 0;
@@ -80,62 +79,49 @@ const SketchPong = () => {
 
   let scalingRatio: number = 0;
 
-  function buttonPressed(nbr: number) {
-    button_cpt = 1;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    console.log("nbr " + nbr);
-=======
-    //console.log("nbr " + nbr);
->>>>>>> auth_master
-=======
-    //console.log("nbr " + nbr);
->>>>>>> auth_master
+  function buttonPressed() {
     if (socket.current != null)
-      socket.current.emit("spectJoin", { value: nbr });
-    setState("started watching");
-    //hh = c;
-    //buttons.splice(0, c);
-    //
+      socket.current.emit("Game_Stopped");
+    setState("Ended");
+    navigate("/");
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  useEffect(() => {
-    socket.current = io("http://localhost:5555").on("connect", () => {
-=======
-=======
->>>>>>> auth_master
+  function buttonPressed_2() {
+    navigate("/")
+    //setState("Ended");
+  }
 
   useEffect(() => {
 
 
-    socket.current = io("http://localhost:4000", {
+    socket.current = io("http://10.12.3.2:4000", {
       withCredentials: true,
     }).on("connect", () => {
-<<<<<<< HEAD
->>>>>>> auth_master
-=======
->>>>>>> auth_master
 
     if (socket.current != null)
     {
         socket.current.on('gameCount', (data) => {
         hh = data;
         setLayhfdk(+ data);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        console.log("wch a 3chiri " + layhfdk);
-=======
-        //console.log("wch a 3chiri " + layhfdk);
->>>>>>> auth_master
-=======
-        //console.log("wch a 3chiri " + layhfdk);
->>>>>>> auth_master
+        
       });      
+
+
+      
     }
-    if (state == "play" && layhfdk === 0)
-      socket.current?.emit("player_join_queue");
+   
+    setCpt(Cpt + 1);
+   
+    
+    if (layhfdk === 0 && gameState.current?.state !== "ended")
+    {
+      const game_mode : number =  + (window.location.pathname.split("/")[2]);
+      if (game_mode !== 4)
+        socket.current?.emit("player_join_queue", { mode: game_mode, state: 0});
+      else 
+        socket.current?.emit("invite_queue", { mode: game_mode, state: 3});
+    }
+      
       else if (state == "spect")
       {
 
@@ -144,17 +130,20 @@ const SketchPong = () => {
           socket.current.on('gameCount', (data) => {
             hh = data;
             setLayhfdk(+ data);
-<<<<<<< HEAD
-<<<<<<< HEAD
-            console.log("wch a 3chiri " + layhfdk);
-=======
-            //console.log("wch a 3chiri " + layhfdk);
->>>>>>> auth_master
-=======
-            //console.log("wch a 3chiri " + layhfdk);
->>>>>>> auth_master
+            
           });
+          
       }
+
+      if (socket.current != null)
+      socket.current.on('It_ended', (data) => {
+
+        let val_e = data;
+        const game_mod : number =  + (window.location.pathname.split("/")[2]);
+     
+        socket.current?.emit("GameEnded",{ mode: game_mod });
+        
+      });
 
       socket.current?.on("queue_status", (data: GameState) => {
 
@@ -172,88 +161,122 @@ const SketchPong = () => {
   }, [state, layhfdk]);
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  const setup = (p5: p5Types, canvasParentRef: Element) => {
-    p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
-    
-=======
-=======
->>>>>>> auth_master
-  const setup_2 = (p5: p5Types,canvasParentRef: Element) => {
-    p5.createCanvas(window.innerWidth/4 , (window.innerWidth / 8)).parent(canvasParentRef)
-
-    p5.background(70);
-
-  }
-
-  function draw_2(p5: p5Types)
-  {
-    p5.resizeCanvas(window.innerWidth/2 , (window.innerWidth / 8))
-
-    p5.background(70);
-    function getWindowSize() {
-      const { innerWidth, innerHeight } = window;
-      return { innerWidth, innerHeight };
-    }
-    const player_names = (p5: p5Types) => {
-      // this method will allow us to draw the score line of both players
-      // we start of by filling the whole screen black 
-      // we allign the text in the center and we can rectrieve the score of each players using the gamestate that is constantly
-      //retrieving data from the backend of our code and then we display it
-      // how to create as many buttons as i want based on a number 
-
-      p5.fill(0);
-      p5.textSize((getWindowSize().innerHeight * 20) / getWindowSize().innerHeight);
-      p5.textAlign(p5.CENTER);
-      //p5.resizeCanvas(getWindowSize().innerWidth, getWindowSize().innerHeight);
-      //console.log(relativeHeight);
-      if (gameState.current != null) {
-        p5.text(
-          gameState.current.players_names[0],
-          (getWindowSize().innerWidth / 46) * 7,
-          getWindowSize().innerWidth / 32
-        );
-
-        // p5.loadImage(gameState.current.players_avatar[0]);
-        // p5.loadImage(gameState.current.players_avatar[1]);
-
-        p5.text(
-          gameState.current.players_names[1],
-          (getWindowSize().innerWidth / 24) * 9,
-          getWindowSize().innerWidth / 32
-        );
-
-
-
-      }
-
-    };
-    player_names(p5);
-
-  }
 
   const setup = (p5: p5Types,canvasParentRef: Element) => {
     p5.createCanvas(window.innerWidth / 2, (window.innerWidth / 4)).parent(canvasParentRef)
 
-<<<<<<< HEAD
->>>>>>> auth_master
-=======
->>>>>>> auth_master
     p5.background(122);
+    const game_mode : number =  + (window.location.pathname.split("/")[2]);
+    
+    socket.current?.emit("game_mode", { mode: game_mode });
 
   }
 
+  function User_avatar_one() {
+    if (gameState.current != null && gameState.current.users.length === 2)
+      setUserone(gameState.current.players_avatar[0]);
+    else
+      setUserone(avatar1);
+    const imageLink = user_one;
+  
+    return (
+      
+        <img className="rounded-full" src={imageLink} alt="description of image" />
+      
+    );
+  }
+
+  function User_avatar_two() {
+    if (gameState.current != null && gameState.current.users.length === 2) 
+      setUsertwo(gameState.current.players_avatar[1]);
+    else
+      setUsertwo(avatar1);
+    
+    const imageLink = user_two;
+  
+    return (
+        <img className="rounded-full" src={imageLink} alt="description of image" />
+    );
+  }
+
+  function Show_users_props() {
+    if (gameState.current != null && gameState.current.users.length === 2)
+    {
+      setUserone_score(gameState.current.scores[0]);
+      setUsertwo_score(gameState.current.scores[1]);
+
+      setUserone_name(gameState.current.players_names[0]);
+      setUsertwo_name(gameState.current.players_names[1]);
+    }
+    else
+    {
+      setUserone_score(0);
+      setUsertwo_score(0);
+
+      setUserone_name("Player 1");
+      setUsertwo_name("Player 2");
+    }
+
+    const user_fr_score = user_one_score;
+    const user_sec_score = user_two_score;
+
+    const user_fr_name = user_one_name;
+    const user_sec_name = user_two_name;
+  
+    return (
+      <div className="flex flex-row justify-between items-center bg-transparent py-1 my-4 w-3/4 bg-[#262626] hover:bg-black hover:text-red-600 h-[110px] rounded-full ">
+      <div className=" w-2/12  justify-around h-5/6 hidden md:flex ">
+        <User_avatar_one />
+      </div>
+      <div className="flex w-2/12 sm:text-sm lg:text-2xl bg-[#1F9889] text-black items-center justify-center my-9 hover:text-black bg-mine-490 hover:bg-white rounded-lg ">
+      {user_fr_name}
+      </div>
+      <div className="flex  w-2/12 lg:text-3xl sm:text-base text-yellow-600 items-center hover:text-red-600 justify-center">
+      {user_fr_score} - {user_sec_score}
+      </div>
+      <div className="flex  w-2/12 sm:text-sm lg:text-2xl bg-[#1F9889] text-black items-center justify-center my-9 hover:text-black bg-mine-490 hover:bg-white rounded-lg">
+      {user_sec_name}
+      </div>
+      <div className="md:flex  hidden align-end w-2/12  h-5/6 ">
+        <User_avatar_two />
+      </div>
+      </div>
+    );
+  }
+
+
+
   function draw(p5: p5Types) {
+    
     function getWindowSize() {
       const { innerWidth, innerHeight } = window;
       return { innerWidth, innerHeight };
     }
-
-    function get_window_height() {
-      return getWindowSize().innerHeight;
-    }
     if (gameState.current != null) {
+     
+      const game_mode : number =  + (window.location.pathname.split("/")[2]);
+      // if (gameState.current.state === "endGame")
+      // {
+      //   if (gameState.current.scores[0] === gameState.current.score_limit)
+      //   {
+          
+      //     socket.current?.emit("GameEnded",{ mode: game_mode });
+      //   }
+      //   else if (gameState.current.scores[1] === gameState.current.score_limit)
+      //   {
+      //     socket.current?.emit("GameEnded",{ mode: game_mode });
+      //   }
+      // }
+
+      setUserone(gameState.current.players_avatar[0]);
+      setUsertwo(gameState.current.players_avatar[1]);
+
+      setUserone_score(gameState.current.scores[0]);
+      setUsertwo_score(gameState.current.scores[1]);
+
+      setUserone_name(gameState.current.players_names[0]);
+      setUsertwo_name(gameState.current.players_names[1]);
+
       aspectRatio = gameState.current.aspectRatio;
 
       absoluteWidth = gameState.current.width;
@@ -264,36 +287,21 @@ const SketchPong = () => {
       relativeHeight = (relativeWidth / aspectRatio);
 
       scalingRatio = relativeWidth / absoluteWidth;
-<<<<<<< HEAD
-<<<<<<< HEAD
-      console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
-=======
-      //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
->>>>>>> auth_master
-=======
-      //console.log("MY section width is  " + relativeWidth + " my section height is " + relativeHeight);
->>>>>>> auth_master
+      
     }
 
     p5.resizeCanvas(window.innerWidth /2 , window.innerWidth/4);
     p5.background(122);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     
 
->>>>>>> auth_master
-=======
-    
-
->>>>>>> auth_master
     if (gameState.current != null) 
     {
+     
 
       const drawClickToStartText = (p5: p5Types) => {
         if (gameState.current != null && socket.current != null) {
-
+            
 
           let width = getWindowSize().innerWidth;
           let height = getWindowSize().innerHeight;
@@ -330,84 +338,60 @@ const SketchPong = () => {
 
       };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-      
+      const draw_Game_ended = (p5: p5Types) => {
+        if (gameState.current != null && socket.current != null) {
+            
 
->>>>>>> auth_master
-=======
-      
-
->>>>>>> auth_master
-      const drawScore = (p5: p5Types) => {
-        // this method will allow us to draw the score line of both players
-        // we start of by filling the whole screen black 
-        // we allign the text in the center and we can rectrieve the score of each players using the gamestate that is constantly
-        //retrieving data from the backend of our code and then we display it
-        // how to create as many buttons as i want based on a number 
-
-        p5.fill(0);
-        p5.textSize((getWindowSize().innerHeight * 20) / getWindowSize().innerHeight);
-        p5.textAlign(p5.CENTER);
-        //p5.resizeCanvas(getWindowSize().innerWidth, getWindowSize().innerHeight);
-        //console.log(relativeHeight);
-        if (gameState.current != null) {
-          p5.text(
-            gameState.current.scores[0],
-            (getWindowSize().innerWidth / 32) * 7,
-            getWindowSize().innerWidth / 8
-          );
-          p5.text(
-            gameState.current.scores[1],
-            (getWindowSize().innerWidth / 32) * 9,
-            getWindowSize().innerWidth / 8
-          );
-          if (gameState.current.state == "endGame") {
-            p5.text("Player 1 Won the game",
-              (getWindowSize().innerWidth) / 4,
-              getWindowSize().innerWidth / 16
-            );
-          }
-
+          let width = getWindowSize().innerWidth;
+          let height = getWindowSize().innerHeight;
+          
+            p5.fill(0);
+            p5.textSize(((relativeWidth) / 35));
+            p5.textAlign(p5.CENTER);
+            const scores = gameState.current.scores;
+            const scoresSum = scores[0] + scores[1];
+              setState("Ended");
+              // this is in case it's a spectator he can only watch without interfering in the game because his id couldn't be find 
+              // in the players id array 
+              p5.text("Game Ended Winner is "+gameState.current.winner_name,
+                (width) / 4,
+                width / 16
+              );
+            
+          
         }
 
       };
-      //p5.clear();
 
+      const draw_Game_declined = (p5: p5Types) => {
+        if (gameState.current != null && socket.current != null) {
+            
 
-      // if (gameState.current.state == "endGame")
-      //   console.log("hana habibi");
-      //console.log("Asbhan lah " + gameState.current.state);
-      // p5.resizeCanvas(getWindowSize().innerWidth   , relativeHeight);
-      // p5.background(122);
-<<<<<<< HEAD
-<<<<<<< HEAD
-      drawClickToStartText(p5);
-      drawScore(p5);
-      console.log("Heres my aspect ratio " + aspectRatio);
-=======
-=======
->>>>>>> auth_master
-      //console.log("Plyaer name is "+gameState.current.players_names[0]);
-      drawClickToStartText(p5);
-      drawScore(p5);
+          let width = getWindowSize().innerWidth;
+          let height = getWindowSize().innerHeight;
+          
+            p5.fill(0);
+            p5.textSize(((relativeWidth) / 35));
+            p5.textAlign(p5.CENTER);
+            const scores = gameState.current.scores;
+            const scoresSum = scores[0] + scores[1];
+            
+              // this is in case it's a spectator he can only watch without interfering in the game because his id couldn't be find 
+              // in the players id array 
+              p5.text("User "+gameState.current.users_names[1]+" declined your game Request",
+                (width) / 4,
+                width / 16
+              );
+            
+          
+        }
+
+      };
+
       
-     //player_names(p5);
-      //console.log("Heres my aspect ratio " + aspectRatio);
-<<<<<<< HEAD
->>>>>>> auth_master
-=======
->>>>>>> auth_master
-      //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
-      p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
-
-      p5.rect(gameState.current.sec_paddle_x * scalingRatio, gameState.current.sec_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
-      //the p5.circle method allows us to create a circle using the properties in the arguments x,y,Raduis
-      p5.circle(gameState.current.ball_x * scalingRatio, gameState.current.ball_y * scalingRatio, gameState.current.ball_radius * scalingRatio);
-
-
       if (socket.current != null) {
+
+
         const handlePlayerOneInput = (p5: p5Types) => {
           // this is where we check for the first player's input and how he moves the paddles using W and S 
           // whenever he uses a key we emit an event called playerInput that will later on be received from the backend
@@ -415,29 +399,49 @@ const SketchPong = () => {
           //when the properties gets updated since wr using the same socket of the player he can retrieve the new x,y of paddles
           //then we can clear the whole ground we playing on and design the paddls on it's new x and y 
           //since this update gets called infinitly it will look like it's moving based on your needs 
+          const game_mode : number =  + (window.location.pathname.split("/")[2]);
+         // console.log("hh2");
           if (socket.current != null && gameState.current != null) {
+            //console.log("hh");
+            if (gameState.current.state === "matched")
+            {
+              let width = getWindowSize().innerWidth;
+              p5.fill(0);
+              p5.textSize(((relativeWidth) / 35));
+              p5.textAlign(p5.CENTER);
+
+              p5.text(
+                   "Click enter to start the game ",
+                (width) / 4,
+                width / 16
+              );
+              if (p5.keyIsDown(13))
+               socket.current.emit("player_pressed_key", { input: "ENTER",mode: game_mode });
+            }
+             
             if (p5.keyIsDown(13) && socket.current.id !== gameState.current.lastscored) {
-              socket.current.emit("player_pressed_key", { input: "ENTER" });
+              socket.current.emit("player_pressed_key", { input: "ENTER",mode: game_mode });
             }
             if (p5.keyIsDown(87)) {
-              socket.current.emit("player_pressed_key", { input: "UP" });
+              socket.current.emit("player_pressed_key", { input: "UP",mode: game_mode });
             }
 
             if (p5.keyIsDown(83)) {
-              socket.current.emit("player_pressed_key", { input: "DOWN" });
+              socket.current.emit("player_pressed_key", { input: "DOWN",mode: game_mode });
             }
           }
         }
         const handlePlayerTwoInput = (p5: p5Types) => {
+          const game_mode : number =  + (window.location.pathname.split("/")[2]);
           if (socket.current != null && gameState.current != null) {
             if (p5.keyIsDown(13) && socket.current.id !== gameState.current.lastscored) {
-              socket.current.emit("player_pressed_key", { input: "ENTER" });
+              socket.current.emit("player_pressed_key", { input: "ENTER",mode: game_mode });
             }
             if (p5.keyIsDown(87)) {
-              socket.current.emit("player_pressed_key", { input: "UP" });
+              socket.current.emit("player_pressed_key", { input: "UP",mode: game_mode});
             }
             if (p5.keyIsDown(83)) {
-              socket.current.emit("player_pressed_key", { input: "DOWN" });
+              socket.current.emit("player_pressed_key", { input: "DOWN",mode: game_mode });
             }
           }
 
@@ -450,10 +454,45 @@ const SketchPong = () => {
         // when we call arr.indexOf("Sdcsdcs51s0") which is the first one it will print out 0 
         //when we receive 1 or 0 or we call their own paddle updating functions
         //console.log("Index is "+(socket.current?.id));
-        if (gameState.current.players.indexOf(socket.current?.id) === 0)
-          handlePlayerOneInput(p5);
-        if (gameState.current.players.indexOf(socket.current.id) === 1)
-          handlePlayerTwoInput(p5);
+        // if (gameState.current.players.indexOf(socket.current?.id) === 0)
+        // { 
+        //   console.log("ana");  
+        if (gameState.current.state === "decline")
+        {
+          navigate("/")
+          socket.current.disconnect();
+          
+        }
+        else if (gameState.current.state === "ended")
+        {
+
+           draw_Game_ended(p5);
+        }
+         
+        else
+        {
+          drawClickToStartText(p5);
+          p5.fill(0);
+          
+        //player_names(p5);
+          
+          //the p5.rect method allows us to create a rectangle using the properties in the arguments x,y,width,heigh
+          p5.rect(gameState.current.fr_paddle_x * scalingRatio, gameState.current.fr_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
+    
+          p5.rect(gameState.current.sec_paddle_x * scalingRatio, gameState.current.sec_paddle_y * scalingRatio, gameState.current.paddle_width * scalingRatio, gameState.current.paddle_height * scalingRatio);
+          //the p5.circle method allows us to create a circle using the properties in the arguments x,y,Raduis
+          p5.circle(gameState.current.ball_x * scalingRatio, gameState.current.ball_y * scalingRatio, gameState.current.ball_radius * scalingRatio);
+    
+            handlePlayerOneInput(p5);          
+        }
+
+        //}
+        // if (gameState.current.players.indexOf(socket.current.id) === 1)
+        // {
+        //   console.log("nta"); 
+        //   handlePlayerTwoInput(p5);
+        // }
+        
       }
 
     }
@@ -461,60 +500,67 @@ const SketchPong = () => {
   //};
   return <>
 
-    {
-      state === "waiting" ?
-        <div className="container mx-auto bg-gray-200 rounded-xl shadow border p-8 m-10">
-          <button className="p-2 pl-5 pr-5 transition-colors duration-700 transform bg-indigo-500 hover:bg-blue-400 text-gray-100 text-lg rounded-lg focus:border-4 border-indigo-300" onClick={() => {
-            //alert()
+    
 
-            setState("play");
-            setCpt(Cpt + 1);
-
-          }}
-          >
-            Play a Game
-          </button>
-
-          <button onClick={() => {
-            //alert() 
-            
-            setState("spect")
-
-          }}
-          >
-            Spectate a Game
-          </button>
+              
+      <div className="flex h-screen  w-full scrollbar-hide overflow-y-scroll">
+      {/* <div className="w-14 flex h-full flex-col items-center justify-between bg-black lg:hidden md:hidden">
+        <div className="m-3 w-10 h-10 bg-black">
+          <img src='logo.svg' alt="emmm" />
         </div>
+        <div className="flex flex-col m-3 w-10">
+          <img className="py-3 w-9" src='dashboard.svg' alt="emmm" />
+          <img className="py-3 w-9" src='settings.svg' alt="emmm" />
+          <img className="py-3 w-9" src='addfriends.svg' alt="emmm" />
+          <img className="py-3 w-9" src='Chats.svg' alt="emmm" />
+          <img className="py-3 w-9" src='profile.svg' alt="emmm" />
+        </div>
+        <div className="mb-3">
+          <img className="py-3 w-9" src='logout.svg' alt="emmm" />
+        </div>
+      </div>  */}
+     
+          <Sidebar />
 
-
-        : (state === "spect" ?
-          
-          <div>
-            {/* {Array.from({ length: layhfdk }, (v, i) => i + 1).map(i => (
-              <button key={i} onClick={() => buttonPressed(i)}>YAWDI HAAAANAAAAA {i}</button>
-            ))} */}
-            <Spectator/>
+        <div className="sm:flex-wrap flex flex-grow py-6 w-2/6 bg-[#1a1b26] align-start items-center  justify-start align-center flex-col scrollbar-hide overflow-y-scroll">
+          <div className="flex text-white font-sans text-6xl my-6 w-full justify-center align-middle items-center tracking-wider"> Game 
           </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-          : <div className="canvas-container"><Sketch setup={setup} draw={draw}  /></div>)
-=======
-=======
->>>>>>> auth_master
-          : <div className="canvas-container">
-            <div className="component1">
-              <Sketch setup={setup_2} draw={draw_2}  />
-            </div>
-            <Sketch setup={setup} draw={draw}  />
-            </div>)
-<<<<<<< HEAD
->>>>>>> auth_master
-=======
->>>>>>> auth_master
+        <div className="flex flex-col justify-center items-center w-5/6 h-5/6">
+            <Show_users_props/>
+            <Sketch setup={setup} draw={draw} />
+            <>{ state !== "Ended" ?
+              
+            
+                 <Botona onClick={() => {
+                //alert()
+                buttonPressed();
+              }}
+              >
+                Quit Game
+              </Botona>
+              
+              :
+              <Botona onClick={() => {
+                //alert()
+                buttonPressed_2();
+              }}
+              >
+                Go back to menu
+              </Botona>
+              
+
+          }
+          </>
+          </div>
+
+                   
+          </div>
+        </div>
+    )        
 
 
 
-    }
+    
 
   </>
   return <Sketch setup={setup} draw={draw} />;
@@ -522,4 +568,3 @@ const SketchPong = () => {
 
 
 export default SketchPong;
-

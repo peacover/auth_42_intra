@@ -6,38 +6,28 @@ import Leaderboard from "../components/Home/Leaderboard";
 import MyGames from "../components/Home/MyGames";
 import Achievments from "../components/Home/Achievments";
 import Searchbar from "../components/Searchbar";
-import bookdata from "./bookdata.json"
+
 const Home = () => {
   return (
-    <div>
-      {/* ------- top section ------- */}
-      <div>
-        {/* ------- search input -------- */}
-        <div className="w-[593px] h-[52px] flex">
-          <span className="bg-[#E8E8E8] px-[30px] rounded-l-[10px] flex justify-center items-center cursor-pointer">
-            <Searchbar />
-          </span>
-          <input
-            className="grow h-[100%] bg-[#E8E8E8] text-[#7B7B7B] text-[14px]"
-            type="text"
-            placeholder="Search items, collections, and users"
-          />
-          <span className="bg-[#E8E8E8] px-[30px] rounded-r-[10px] flex justify-center items-center cursor-pointer">
-            <TbAdjustmentsHorizontal className="text-[#7B7B7B] text-[1.5rem]" />
-          </span>
-        </div>
-      </div>
-      {/* ---------- upper part -------- */}
-      <div className="flex items-center gap-[66px] mt-[72px]">
-        <MyCollection />
-        <Leaderboard />
-      </div>
-      {/* ----------- bottom part ---------- */}
-      <div className="flex items-center gap-[44px] mt-[36px]">
-        <MyGames />
-        <Achievments />
+    <div className="flex flex-col sm:flex-wrap w-full justify-center items-center">
+    {/* ------- top section ------- */}
+    <div className="flex">
+      {/* ------- search input -------- */}
+      <div className="flex justify-center items-center">
+        <span className="px-[30px] rounded-l-[10px] flex justify-center items-center cursor-pointer w-full">
+          <Searchbar />
+        </span>
       </div>
     </div>
+    <div className="flex items-center gap-x-10 justify-center mt-8 flex-wrap gap-6 w-8/12">
+      <MyCollection />
+      <Leaderboard />
+    </div>
+    <div className="flex items-center justify-center gap-[44px] mt-[36px] flex-wrap w-full">
+      <MyGames />
+     
+    </div>
+  </div>
   );
 };
 

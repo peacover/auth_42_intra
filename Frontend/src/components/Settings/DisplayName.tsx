@@ -4,11 +4,11 @@ import React, { useState } from "react";
 const DisplayName = (props : any) => {
     const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUzOTIxIiwiaWF0IjoxNjczNDgxMDkzLCJleHAiOjE2NzM1Njc0OTN9.dyBDDlnX81D8Hmb6Sj7znPq3j8D62cx2RCYmW47satw"
     const [newUsername, SetNewUsername] = useState('');
-    const url3 = "http://localhost:5000/user/edit_full_name/"
+    const url3 = "http://10.12.3.2:5000/user/edit_full_name/"
     const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) =>
     {
       e.preventDefault();
-      console.log(url3 + newUsername);
+      // console.log(url3 + newUsername);
          let response = await axios.post(url3 + newUsername,{ newUsername },
           {
            withCredentials: true,
@@ -17,14 +17,17 @@ const DisplayName = (props : any) => {
           props.setUser(newUsername);
           //SetNewUsername(newUsername);
           // console.log(props);
+         }).catch((err) =>
+         {
+          window.alert("Error While Updating Your Name ");
          });
-        console.log("okkkk");
+        
     }
     const HandleFile = (event: any | null) =>{
       const file = event.target.files[0];
         const formData = new FormData();
         formData.append("file",file);
-        axios.post('http://localhost:5000/user/upload/',formData,{
+        axios.post('http://10.12.3.2:5000/user/upload/',formData,{
           headers:{
             "Content-Type": "multipart/form-data",
           },
@@ -32,6 +35,8 @@ const DisplayName = (props : any) => {
         }).then((response)=>{
 
           props.setAvatar(formData);
+        }).catch((err) =>{
+          window.alert("Error While Uploading Your File");
         });
     }
   

@@ -2,8 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
+import { AppGateway } from './app.gateway';
+import { UserService } from './user/user.service';
 import { GameModule } from './game/app.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,7 +18,10 @@ import { GameModule } from './game/app.module';
     UsersModule,
     GameModule,
     PrismaModule,
+    ChatModule,
+    JwtModule,
   ],
+  providers: [AppGateway, UserService, ConfigService]
 })
 export class AppModule {}
 
@@ -31,7 +38,7 @@ export class AppModule {}
 // # CLIENT_SECRET="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"
 // CLIENT_ID="u-s4t2ud-43c0dd658837a1d14075388a8c39e3b291d160da8083481ecbb668434b40b22d"
 // CLIENT_SECRET="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"
-// CALLBACK_URL="http://localhost:3000/auth/login"
+// CALLBACK_URL="http://10.12.3.2:3000/auth/login"
 
 // JWT_SECRET="secret-password"
 

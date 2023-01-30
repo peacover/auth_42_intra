@@ -42,7 +42,7 @@ type Props = {
 export const Lobby: FunctionComponent<Props>  = (props: any) => {
 
   function joinRoom() {
-    console.log("Ana hna " + props.value);
+    // console.log("Ana hna " + props.value);
     return <SketchPong/>;
     <Route path='/' element={<SketchPong/>} />
   }
@@ -55,7 +55,7 @@ export const Lobby: FunctionComponent<Props>  = (props: any) => {
 
 export function MessageInput({joinRoom}: {joinRoom:() => void}) {
   const [value, setValue] = useState<string>("")
-  console.log(value);
+  // console.log(value);
 return (
   <>
   <div>
